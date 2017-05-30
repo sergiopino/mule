@@ -56,7 +56,6 @@ public class FixedFrequencyScheduler<T extends Runnable> extends PollScheduler<T
     private long startDelay;
 
 
-
     /**
      * <p>
      * A {@link SimpleLifecycleManager} to manage the {@link Scheduler} lifecycle.
@@ -152,6 +151,20 @@ public class FixedFrequencyScheduler<T extends Runnable> extends PollScheduler<T
 
     /**
      * <p>
+     * Reschedule the job if this scheduler was already registered or register a new one if not.
+     * </p>
+     * @throws MuleException If there is an internal error scheduling the job.
+     */
+    public synchronized void reschedule() throws MuleException
+    {
+        executor.shutdown();
+        executor = Executors.newSingleThreadScheduledExecutor();
+        ((ScheduledExecutorService) executor).scheduleAtFixedRate(job, startDelay, frequency, timeUnit);
+    }
+
+
+    /**
+     * <p>
      * Executes the the {@link Scheduler} task
      * </p>
      */
@@ -203,6 +216,17 @@ public class FixedFrequencyScheduler<T extends Runnable> extends PollScheduler<T
         }
     }
 
+    /**
+     * <p>
+     *  Finds if the scheduler is started or not.
+     * </p>
+     * @return whether the schedulers is started or not started.
+     */
+    public boolean isStarted()
+    {
+        return lifecycleManager.getState().isStarted();
+    }
+
     private boolean isNotStopped()
     {
         return !lifecycleManager.getState().isStopped() && !lifecycleManager.getState().isStopping();
@@ -213,13 +237,70 @@ public class FixedFrequencyScheduler<T extends Runnable> extends PollScheduler<T
         return !lifecycleManager.getState().isStarted() && !lifecycleManager.getState().isStarting();
     }
 
+    /**
+     * <p>
+     * Gets the frequency of the scheduler.
+     * </p>
+     * @return the frequency of the scheduler.
+     */
     public long getFrequency()
     {
         return frequency;
     }
 
+    /**
+     * <p>
+     * Sets the frequency of the scheduler.
+     * </p>
+     * @param frequency the frequency of the scheduler to set.
+     */
+    public void setFrequency(long frequency)
+    {
+        this.frequency = frequency;
+    }
+
+    /**
+     * <p>
+     * Gets the time unit of the scheduler.
+     * </p>
+     * @return Th
+     */
     public TimeUnit getTimeUnit()
     {
         return timeUnit;
+    }
+
+    /**
+     * <p>
+     * Sets the time unit of the scheduler.
+     * </p>
+     * @param timeUnit the time unit of the scheduler to set.
+     */
+    public void setTimeUnit(TimeUnit timeUnit)
+    {
+        this.timeUnit = timeUnit;
+    }
+
+
+    /**
+     * <p>
+     * Gets the start delay of the scheduler.
+     * </p>
+     * @return
+     */
+    public long getStartDelay()
+    {
+        return startDelay;
+    }
+
+    /**
+     * <p>
+     * Sets the start delay of the scheduler.
+     * </p>
+     * @param startDelay the start delay of the scheduler to set.
+     */
+    public void setStartDelay(long startDelay)
+    {
+        this.startDelay = startDelay;
     }
 }

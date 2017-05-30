@@ -7,6 +7,7 @@
 package org.mule.modules.schedulers.cron;
 
 import static org.mule.modules.schedulers.i18n.SchedulerMessages.couldNotCreateScheduler;
+import static org.mule.modules.schedulers.i18n.SchedulerMessages.couldNotGetSchedulerStatus;
 import static org.mule.modules.schedulers.i18n.SchedulerMessages.couldNotPauseSchedulers;
 import static org.mule.modules.schedulers.i18n.SchedulerMessages.couldNotScheduleJob;
 import static org.mule.modules.schedulers.i18n.SchedulerMessages.couldNotShutdownScheduler;
@@ -189,9 +190,77 @@ public class CronScheduler extends PollScheduler<PollingReceiverWorker> implemen
         }
     }
 
+    /**
+     * <p>
+     * Reschedule the job if this scheduler was already registered or register a new one if not.
+     * </p>
+     * @throws MuleException If there is an internal error scheduling the job.
+     */
+    public void reschedule() throws MuleException
+    {
+        try
+        {
+            CronTrigger cronTrigger = newTrigger()
+                    .withIdentity(getName(), groupName)
+                    .forJob(jobName, groupName)
+                    .withSchedule(cronSchedule(cronExpression).inTimeZone(timeZone))
+                    .build();
+
+            if (quartzScheduler.getTrigger(TriggerKey.triggerKey(getName(), groupName)) == null)
+            {
+                quartzScheduler.scheduleJob(cronTrigger);
+            }
+            else
+            {
+                quartzScheduler.rescheduleJob(TriggerKey.triggerKey(getName(), groupName), cronTrigger);
+            }
+
+        }
+        catch (SchedulerException e)
+        {
+            throw new DefaultMuleException(couldNotScheduleJob(), e);
+        }
+    }
+
+    /**
+     * <p>
+     *  Finds if the scheduler is started or not.
+     * </p>
+     * @return whether the schedulers is started or not started.
+     * @throws MuleException if an error occurs retrieving the scheduler status.
+     */
+    public boolean isStarted() throws MuleException
+    {
+        try
+        {
+            return quartzScheduler.isStarted();
+        }
+        catch (SchedulerException e)
+        {
+            throw new DefaultMuleException(couldNotGetSchedulerStatus(), e);
+        }
+    }
+
+    /**
+     * <p>
+     * Gets the Cron Expression of the Scheduler.
+     * </p>
+     * @return The Cron Expression of the Scheduler.
+     */
     public String getCronExpression()
     {
         return cronExpression;
+    }
+
+    /**
+     * <p>
+     * Sets the Cron Expression of the Scheduler.
+     * </p>
+     * @param cronExpression The Cron Expression of the Scheduler.
+     */
+    public void setCronExpression(String cronExpression)
+    {
+        this.cronExpression = cronExpression;
     }
 
     /**
@@ -200,6 +269,18 @@ public class CronScheduler extends PollScheduler<PollingReceiverWorker> implemen
     public TimeZone getTimeZone()
     {
         return timeZone;
+    }
+
+
+    /**
+     * <p>
+     * Sets the {@link TimeZone} in which the {@code cronExpression} will be based.
+     * </p>
+     * @param timeZone The {@link TimeZone} in which the {@code cronExpression} will be based.
+     */
+    public void setTimeZone(TimeZone timeZone)
+    {
+        this.timeZone = timeZone;
     }
 
     @Override

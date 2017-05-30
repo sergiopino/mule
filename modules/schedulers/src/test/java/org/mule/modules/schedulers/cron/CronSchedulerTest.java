@@ -93,6 +93,37 @@ public class CronSchedulerTest  extends AbstractMuleContextTestCase
         });
     }
 
+    @Test
+    public void rescheduleAfterReconfiguration() throws Exception
+    {
+        final TestPollingWorker job = new TestPollingWorker(receiver);
+        CronScheduler scheduler = createLongScheduler(job);
+
+        scheduler.initialise();
+        scheduler.start();
+
+        scheduler.setCronExpression("0/1 * * * * ?");
+        scheduler.setTimeZone(TimeZone.getTimeZone("America/Buenos_Aires"));
+
+        assertFalse(job.wasRun);
+        scheduler.reschedule();
+
+        pollingProber.check(new Probe()
+        {
+            @Override
+            public boolean isSatisfied()
+            {
+                return job.wasRun;
+            }
+
+            @Override
+            public String describeFailure()
+            {
+                return "The scheduler was never run";
+            }
+        });
+    }
+
     private CronScheduler createVoidScheduler()
     {
         CronScheduler scheduler = new CronScheduler("name", new PollingReceiverWorker(receiver), "0/1 * * * * ?", TimeZone.getDefault());
@@ -103,6 +134,13 @@ public class CronSchedulerTest  extends AbstractMuleContextTestCase
     private CronScheduler createScheduler(PollingReceiverWorker job)
     {
         CronScheduler cronScheduler = new CronScheduler("name", job, "0/1 * * * * ?", TimeZone.getDefault());
+        cronScheduler.setMuleContext(muleContext);
+        return cronScheduler;
+    }
+
+    private CronScheduler createLongScheduler(PollingReceiverWorker job)
+    {
+        CronScheduler cronScheduler = new CronScheduler("name", job, "0 0 12 1/1 * ? 2099", TimeZone.getDefault());
         cronScheduler.setMuleContext(muleContext);
         return cronScheduler;
     }

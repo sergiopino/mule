@@ -6,7 +6,6 @@
  */
 package org.mule.transport.polling.schedule;
 
-
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import org.mule.api.MuleException;
@@ -21,8 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
-public class FixedFrequencySchedulerTest extends AbstractMuleContextTestCase
-{
+public class FixedFrequencySchedulerTest extends AbstractMuleContextTestCase {
 
     private AbstractPollingMessageReceiver receiver = mock(AbstractPollingMessageReceiver.class);
     private Prober pollingProber = new PollingProber(1000, 0l);
@@ -67,19 +65,47 @@ public class FixedFrequencySchedulerTest extends AbstractMuleContextTestCase
         pollingProber.check(new Probe()
         {
             @Override
-            public boolean isSatisfied()
-            {
+            public boolean isSatisfied() {
                 return job.wasRun;
             }
 
             @Override
-            public String describeFailure()
-            {
+            public String describeFailure() {
                 return "The scheduler was never run";
             }
         });
 
         scheduler.stop();
+    }
+
+    @Test
+    public void rescheduleAfterReconfiguration() throws Exception
+    {
+        final TestPollingWorker job = new TestPollingWorker(receiver);
+        FixedFrequencyScheduler scheduler = createScheduler(job);
+
+        scheduler.initialise();
+        scheduler.start();
+
+        scheduler.setFrequency(5000);
+        scheduler.setStartDelay(100);
+        scheduler.setTimeUnit(TimeUnit.MILLISECONDS);
+
+        assertFalse(job.wasRun);
+        scheduler.reschedule();
+
+        pollingProber.check(new Probe()
+        {
+            @Override
+            public boolean isSatisfied() {
+                return job.wasRun;
+            }
+
+            @Override
+            public String describeFailure() {
+                return "The scheduler was never run";
+            }
+        });
     }
 
     private FixedFrequencyScheduler createVoidScheduler()
