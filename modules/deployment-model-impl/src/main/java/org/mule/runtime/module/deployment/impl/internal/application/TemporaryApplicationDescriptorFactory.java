@@ -27,7 +27,7 @@ public class TemporaryApplicationDescriptorFactory extends ApplicationDescriptor
   public TemporaryApplicationDescriptorFactory(ArtifactPluginDescriptorLoader artifactPluginDescriptorLoader,
                                                ArtifactPluginRepository applicationPluginRepository,
                                                DescriptorLoaderRepository descriptorLoaderRepository) {
-    super(artifactPluginDescriptorLoader, applicationPluginRepository, descriptorLoaderRepository);
+    super(artifactPluginDescriptorLoader, descriptorLoaderRepository);
   }
 
   @Override

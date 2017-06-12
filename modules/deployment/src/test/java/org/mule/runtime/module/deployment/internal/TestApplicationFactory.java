@@ -71,7 +71,7 @@ public class TestApplicationFactory extends DefaultApplicationFactory {
         new ArtifactPluginDescriptorLoader(artifactPluginDescriptorFactory);
     TestEmptyApplicationPluginRepository applicationPluginRepository = new TestEmptyApplicationPluginRepository();
     ApplicationDescriptorFactory applicationDescriptorFactory =
-        new ApplicationDescriptorFactory(artifactPluginDescriptorLoader, applicationPluginRepository, descriptorLoaderRepository);
+        new ApplicationDescriptorFactory(artifactPluginDescriptorLoader, descriptorLoaderRepository);
     final DefaultClassLoaderManager artifactClassLoaderManager = new DefaultClassLoaderManager();
     PluginDependenciesResolver pluginDependenciesResolver = new BundlePluginDependenciesResolver(artifactPluginDescriptorFactory);
 

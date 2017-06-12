@@ -136,7 +136,7 @@ public class MuleArtifactResourcesRegistry {
     artifactPluginDescriptorLoader = new ArtifactPluginDescriptorLoader(artifactPluginDescriptorFactory);
     descriptorLoaderRepository = new ServiceRegistryDescriptorLoaderRepository(new SpiServiceRegistry());
     applicationDescriptorFactory =
-        new ApplicationDescriptorFactory(artifactPluginDescriptorLoader, artifactPluginRepository, descriptorLoaderRepository);
+        new ApplicationDescriptorFactory(artifactPluginDescriptorLoader, descriptorLoaderRepository);
     DeployableArtifactClassLoaderFactory<ApplicationDescriptor> applicationClassLoaderFactory =
         trackDeployableArtifactClassLoaderFactory(new MuleApplicationClassLoaderFactory(new DefaultNativeLibraryFinderFactory()));
     pluginDependenciesResolver = new BundlePluginDependenciesResolver(artifactPluginDescriptorFactory);

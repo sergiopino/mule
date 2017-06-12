@@ -8,7 +8,6 @@ package org.mule.runtime.module.deployment.impl.internal.application;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.apache.commons.io.FileUtils.copyFile;
 import static org.apache.commons.io.FileUtils.toFile;
 import static org.apache.commons.io.IOUtils.copy;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
@@ -21,34 +20,28 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mule.maven.client.api.MavenClientProvider.discoverProvider;
 import static org.mule.runtime.container.api.MuleFoldersUtil.getAppClassesFolder;
 import static org.mule.runtime.container.api.MuleFoldersUtil.getAppConfigFolder;
 import static org.mule.runtime.container.api.MuleFoldersUtil.getAppFolder;
-import static org.mule.runtime.container.api.MuleFoldersUtil.getAppPluginsFolder;
 import static org.mule.runtime.core.api.config.MuleProperties.MULE_HOME_DIRECTORY_PROPERTY;
 import static org.mule.runtime.core.api.util.FileUtils.unzip;
 import static org.mule.runtime.deployment.model.api.application.ApplicationDescriptor.DEFAULT_CONFIGURATION_RESOURCE_LOCATION;
 import static org.mule.runtime.deployment.model.api.plugin.ArtifactPluginDescriptor.MULE_PLUGIN_CLASSIFIER;
 import static org.mule.runtime.module.artifact.descriptor.BundleScope.COMPILE;
-import static org.mule.runtime.module.artifact.descriptor.ClassLoaderModel.NULL_CLASSLOADER_MODEL;
-
 import org.mule.runtime.api.meta.MuleVersion;
 import org.mule.runtime.container.api.MuleFoldersUtil;
 import org.mule.runtime.core.api.util.IOUtils;
 import org.mule.runtime.core.registry.SpiServiceRegistry;
 import org.mule.runtime.deployment.model.api.application.ApplicationDescriptor;
-import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginDescriptor;
 import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginRepository;
 import org.mule.runtime.globalconfig.api.GlobalConfigLoader;
 import org.mule.runtime.module.artifact.descriptor.BundleDependency;
 import org.mule.runtime.module.artifact.descriptor.ClassLoaderModel;
 import org.mule.runtime.module.deployment.impl.internal.artifact.ServiceRegistryDescriptorLoaderRepository;
 import org.mule.runtime.module.deployment.impl.internal.builder.ApplicationFileBuilder;
-import org.mule.runtime.module.deployment.impl.internal.builder.ArtifactPluginFileBuilder;
 import org.mule.runtime.module.deployment.impl.internal.plugin.ArtifactPluginDescriptorFactory;
 import org.mule.runtime.module.deployment.impl.internal.plugin.ArtifactPluginDescriptorLoader;
 import org.mule.tck.junit4.AbstractMuleTestCase;
@@ -61,13 +54,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.Set;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -117,7 +110,6 @@ public class ApplicationDescriptorFactoryTestCase extends AbstractMuleTestCase {
 
     final ApplicationDescriptorFactory applicationDescriptorFactory =
         new ApplicationDescriptorFactory(new ArtifactPluginDescriptorLoader(new ArtifactPluginDescriptorFactory()),
-                                         applicationPluginRepository,
                                          createDescriptorLoaderRepository());
 
     ApplicationDescriptor desc = applicationDescriptorFactory.create(getAppFolder(APP_NAME));
@@ -133,37 +125,8 @@ public class ApplicationDescriptorFactoryTestCase extends AbstractMuleTestCase {
   }
 
   @Test
-  public void readsPlugin() throws Exception {
-    File pluginDir = getAppPluginsFolder(APP_NAME);
-    pluginDir.mkdirs();
-    final File pluginFile =
-        new ArtifactPluginFileBuilder("plugin").usingLibrary(echoTestJarFile.getAbsolutePath()).getArtifactFile();
-    copyFile(pluginFile, new File(pluginDir, "plugin1.zip"));
-    copyFile(pluginFile, new File(pluginDir, "plugin2.zip"));
-
-    final ArtifactPluginDescriptorFactory pluginDescriptorFactory = mock(ArtifactPluginDescriptorFactory.class);
-
-    final ApplicationDescriptorFactory applicationDescriptorFactory =
-        new ApplicationDescriptorFactory(new ArtifactPluginDescriptorLoader(pluginDescriptorFactory),
-                                         applicationPluginRepository, createDescriptorLoaderRepository());
-    final ArtifactPluginDescriptor expectedPluginDescriptor1 = mock(ArtifactPluginDescriptor.class);
-    when(expectedPluginDescriptor1.getName()).thenReturn("plugin1");
-    when(expectedPluginDescriptor1.getClassLoaderModel()).thenReturn(NULL_CLASSLOADER_MODEL);
-    final ArtifactPluginDescriptor expectedPluginDescriptor2 = mock(ArtifactPluginDescriptor.class);
-    when(expectedPluginDescriptor2.getName()).thenReturn("plugin2");
-    when(expectedPluginDescriptor2.getClassLoaderModel()).thenReturn(NULL_CLASSLOADER_MODEL);
-    when(pluginDescriptorFactory.create(any())).thenReturn(expectedPluginDescriptor1)
-        .thenReturn(expectedPluginDescriptor2);
-
-    ApplicationDescriptor desc = applicationDescriptorFactory.create(getAppFolder(APP_NAME));
-
-    Set<ArtifactPluginDescriptor> plugins = desc.getPlugins();
-    assertThat(plugins.size(), equalTo(2));
-    assertThat(plugins, hasItem(equalTo(expectedPluginDescriptor1)));
-    assertThat(plugins, hasItem(equalTo(expectedPluginDescriptor2)));
-  }
-
-  @Test
+  @Ignore
+  // TODO(pablo.kraan): domains - re-write test
   public void readsSharedLibs() throws Exception {
     File sharedLibsFolder = MuleFoldersUtil.getAppSharedLibsFolder(APP_NAME);
     sharedLibsFolder.mkdirs();
@@ -173,7 +136,7 @@ public class ApplicationDescriptorFactoryTestCase extends AbstractMuleTestCase {
 
     final ApplicationDescriptorFactory applicationDescriptorFactory =
         new ApplicationDescriptorFactory(new ArtifactPluginDescriptorLoader(new ArtifactPluginDescriptorFactory()),
-                                         applicationPluginRepository, createDescriptorLoaderRepository());
+                                         createDescriptorLoaderRepository());
     ApplicationDescriptor desc = applicationDescriptorFactory.create(getAppFolder(APP_NAME));
 
     assertThat(desc.getClassLoaderModel().getUrls().length, equalTo(2));
@@ -186,6 +149,8 @@ public class ApplicationDescriptorFactoryTestCase extends AbstractMuleTestCase {
   }
 
   @Test
+  @Ignore
+  // TODO(pablo.kraan): domains - re-write test
   public void readsRuntimeLibs() throws Exception {
     File libDir = MuleFoldersUtil.getAppLibFolder(APP_NAME);
     libDir.mkdirs();
@@ -195,7 +160,7 @@ public class ApplicationDescriptorFactoryTestCase extends AbstractMuleTestCase {
 
     final ApplicationDescriptorFactory applicationDescriptorFactory =
         new ApplicationDescriptorFactory(new ArtifactPluginDescriptorLoader(new ArtifactPluginDescriptorFactory()),
-                                         applicationPluginRepository, createDescriptorLoaderRepository());
+                                         createDescriptorLoaderRepository());
     ApplicationDescriptor desc = applicationDescriptorFactory.create(getAppFolder(APP_NAME));
 
     assertThat(desc.getClassLoaderModel().getUrls().length, equalTo(2));
@@ -364,7 +329,7 @@ public class ApplicationDescriptorFactoryTestCase extends AbstractMuleTestCase {
   private ApplicationDescriptor createApplicationDescriptor(String appPath) throws URISyntaxException {
     final ApplicationDescriptorFactory applicationDescriptorFactory =
         new ApplicationDescriptorFactory(new ArtifactPluginDescriptorLoader(new ArtifactPluginDescriptorFactory()),
-                                         applicationPluginRepository, createDescriptorLoaderRepository());
+                                         createDescriptorLoaderRepository());
 
     return applicationDescriptorFactory.create(getApplicationFolder(appPath));
   }
