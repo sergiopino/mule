@@ -30,7 +30,7 @@ public class DomainDescriptor extends DeployableArtifactDescriptor {
 
 
   private List<String> configResources =
-    ImmutableList.<String>builder().add(getAppConfigFolderPath() + DEFAULT_CONFIGURATION_RESOURCE).build();
+      ImmutableList.<String>builder().add(getAppConfigFolderPath() + DEFAULT_CONFIGURATION_RESOURCE).build();
   private String[] absoluteResourcePaths;
   private File[] configResourcesFile;
   private Set<ArtifactPluginDescriptor> plugins = new HashSet<>(0);

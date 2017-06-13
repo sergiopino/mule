@@ -41,6 +41,7 @@ public class DomainClassLoaderFactory implements DeployableArtifactClassLoaderFa
 
   private final ClassLoader containerClassLoader;
   private Map<String, ArtifactClassLoader> domainArtifactClassLoaders = new HashMap<>();
+
   /**
    * Creates a new instance
    *
@@ -95,7 +96,7 @@ public class DomainClassLoaderFactory implements DeployableArtifactClassLoaderFa
 
     ArtifactClassLoader classLoader =
         new MuleSharedDomainClassLoader(domain, parent.getClassLoader(), classLoaderLookupPolicy, Arrays
-          .asList(domain.getClassLoaderModel().getUrls()), artifactClassLoaders);
+            .asList(domain.getClassLoaderModel().getUrls()), artifactClassLoaders);
 
     return classLoader;
   }

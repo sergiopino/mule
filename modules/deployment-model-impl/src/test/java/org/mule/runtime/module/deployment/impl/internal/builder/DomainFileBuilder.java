@@ -120,7 +120,8 @@ public class DomainFileBuilder extends DeployableFileBuilder<DomainFileBuilder> 
     return this;
   }
 
-  @Override protected List<ZipResource> doGetCustomResources() {
+  @Override
+  protected List<ZipResource> doGetCustomResources() {
     final List<ZipResource> customResources = new LinkedList<>();
 
     for (ApplicationFileBuilder application : applications) {
@@ -129,7 +130,7 @@ public class DomainFileBuilder extends DeployableFileBuilder<DomainFileBuilder> 
     }
 
     final ZipResource domainProperties =
-      createPropertiesFile(this.deployProperties, DEFAULT_DEPLOY_PROPERTIES_RESOURCE, DEFAULT_DEPLOY_PROPERTIES_RESOURCE);
+        createPropertiesFile(this.deployProperties, DEFAULT_DEPLOY_PROPERTIES_RESOURCE, DEFAULT_DEPLOY_PROPERTIES_RESOURCE);
     if (domainProperties != null) {
       customResources.add(domainProperties);
     }
@@ -139,12 +140,12 @@ public class DomainFileBuilder extends DeployableFileBuilder<DomainFileBuilder> 
 
     // TODO(pablo.kraan): domains - domain should expose only some libs to the apps (ie: some components could be hidden in the domain)
     File applicationDescriptor = createApplicationJsonDescriptorFile(
-      redeploymentEnabled == null
-        ? empty()
-        : ofNullable(Boolean
-                       .valueOf((String) redeploymentEnabled)),
-      Optional.ofNullable((String) configResources),
-      empty());
+                                                                     redeploymentEnabled == null
+                                                                         ? empty()
+                                                                         : ofNullable(Boolean
+                                                                             .valueOf((String) redeploymentEnabled)),
+                                                                     Optional.ofNullable((String) configResources),
+                                                                     empty());
 
     customResources.add(new ZipResource(applicationDescriptor.getAbsolutePath(), MULE_DOMAIN_JSON_LOCATION));
     return customResources;
@@ -160,7 +161,7 @@ public class DomainFileBuilder extends DeployableFileBuilder<DomainFileBuilder> 
     File domainDescriptor = new File(getTempFolder(), getArtifactId() + "domain.json");
     domainDescriptor.deleteOnExit();
     MuleDomainModel.MuleDomainModelBuilder MuleDomainModelBuilder =
-      new MuleDomainModel.MuleDomainModelBuilder();
+        new MuleDomainModel.MuleDomainModelBuilder();
     MuleDomainModelBuilder.setName(getArtifactId()).setMinMuleVersion("4.0.0");
     redeploymentEnabled.ifPresent(MuleDomainModelBuilder::setRedeploymentEnabled);
     configResources.ifPresent(configs -> {

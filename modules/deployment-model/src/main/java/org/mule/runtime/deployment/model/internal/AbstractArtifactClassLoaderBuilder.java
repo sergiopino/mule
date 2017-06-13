@@ -117,7 +117,8 @@ public abstract class AbstractArtifactClassLoaderBuilder<T extends AbstractArtif
     checkState(parentClassLoader != null, "parent class loader cannot be null");
     final String artifactId = getArtifactId(artifactDescriptor);
     ClassLoaderLookupPolicy parentLookupPolicy = getParentLookupPolicy(parentClassLoader);
-    RegionClassLoader regionClassLoader = new RegionClassLoader(artifactId, artifactDescriptor, parentClassLoader.getClassLoader(),
+    RegionClassLoader regionClassLoader =
+        new RegionClassLoader(artifactId, artifactDescriptor, parentClassLoader.getClassLoader(),
                               parentLookupPolicy);
 
     ArtifactClassLoaderFilter artifactClassLoaderFilter =

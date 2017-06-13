@@ -148,7 +148,8 @@ public class MuleArtifactResourcesRegistry {
     applicationClassLoaderBuilderFactory =
         new ApplicationClassLoaderBuilderFactory(applicationClassLoaderFactory, this.artifactPluginClassLoaderFactory);
     domainClassLoaderBuilderFactory =
-      new DomainClassLoaderBuilderFactory(containerClassLoader, domainClassLoaderFactory, this.artifactPluginClassLoaderFactory);
+        new DomainClassLoaderBuilderFactory(containerClassLoader, domainClassLoaderFactory,
+                                            this.artifactPluginClassLoaderFactory);
     ArtifactClassLoaderFactory<ServiceDescriptor> serviceClassLoaderFactory = new ServiceClassLoaderFactory();
     serviceManager =
         new MuleServiceManager(new DefaultServiceDiscoverer(
@@ -156,8 +157,10 @@ public class MuleArtifactResourcesRegistry {
                                                                                                     trackArtifactClassLoaderFactory(serviceClassLoaderFactory)),
                                                             new ReflectionServiceResolver(new ReflectionServiceProviderResolutionHelper())));
     extensionModelLoaderManager = new MuleExtensionModelLoaderManager(containerClassLoader);
-    domainFactory = new DefaultDomainFactory(this.domainClassLoaderFactory, domainDescriptorFactory, domainManager, containerClassLoader,
-                                             artifactClassLoaderManager, serviceManager, artifactPluginDescriptorLoader, artifactPluginRepository, pluginDependenciesResolver, domainClassLoaderBuilderFactory);
+    domainFactory =
+        new DefaultDomainFactory(this.domainClassLoaderFactory, domainDescriptorFactory, domainManager, containerClassLoader,
+                                 artifactClassLoaderManager, serviceManager, artifactPluginDescriptorLoader,
+                                 artifactPluginRepository, pluginDependenciesResolver, domainClassLoaderBuilderFactory);
 
     DeployableArtifactClassLoaderFactory<PolicyTemplateDescriptor> policyClassLoaderFactory =
         trackDeployableArtifactClassLoaderFactory(new PolicyTemplateClassLoaderFactory());

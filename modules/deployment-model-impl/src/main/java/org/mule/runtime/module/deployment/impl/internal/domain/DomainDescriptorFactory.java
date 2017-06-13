@@ -60,7 +60,7 @@ public class DomainDescriptorFactory implements ArtifactDescriptorFactory<Domain
   private final DescriptorLoaderRepository descriptorLoaderRepository;
 
   public DomainDescriptorFactory(ArtifactPluginDescriptorLoader artifactPluginDescriptorLoader,
-                                      DescriptorLoaderRepository descriptorLoaderRepository) {
+                                 DescriptorLoaderRepository descriptorLoaderRepository) {
     checkArgument(artifactPluginDescriptorLoader != null, "ApplicationPluginDescriptorFactory cannot be null");
 
     this.artifactPluginDescriptorLoader = artifactPluginDescriptorLoader;
@@ -92,11 +92,11 @@ public class DomainDescriptorFactory implements ArtifactDescriptorFactory<Domain
     BundleDescriptorLoader bundleDescriptorLoader;
     try {
       bundleDescriptorLoader =
-        descriptorLoaderRepository.get(muleDomainModel.getBundleDescriptorLoader().getId(), APP,
-                                       BundleDescriptorLoader.class);
+          descriptorLoaderRepository.get(muleDomainModel.getBundleDescriptorLoader().getId(), APP,
+                                         BundleDescriptorLoader.class);
     } catch (LoaderNotFoundException e) {
       throw new ArtifactDescriptorCreateException(invalidBundleDescriptorLoaderIdError(appFolder, muleDomainModel
-        .getBundleDescriptorLoader()));
+          .getBundleDescriptorLoader()));
     }
 
     try {
@@ -126,13 +126,13 @@ public class DomainDescriptorFactory implements ArtifactDescriptorFactory<Domain
     List<String> configs = muleDomainModel.getConfigs();
     if (configs != null && !configs.isEmpty()) {
       descriptor.setConfigResources(configs.stream().map(configFile -> appendMuleFolder(configFile))
-                                      .collect(toList()));
+          .collect(toList()));
       List<File> configFiles = descriptor.getConfigResources()
-        .stream()
-        .map(config -> new File(domainFolder, config)).collect(toList());
+          .stream()
+          .map(config -> new File(domainFolder, config)).collect(toList());
       descriptor.setConfigResourcesFile(configFiles.toArray(new File[configFiles.size()]));
       descriptor.setAbsoluteResourcePaths(configFiles.stream().map(configFile -> configFile.getAbsolutePath()).collect(toList())
-                                            .toArray(new String[configFiles.size()]));
+          .toArray(new String[configFiles.size()]));
     } else {
       File configFile = new File(domainFolder, appendMuleFolder(DEFAULT_CONFIGURATION_RESOURCE));
       descriptor.setConfigResourcesFile(new File[] {configFile});
@@ -175,7 +175,7 @@ public class DomainDescriptorFactory implements ArtifactDescriptorFactory<Domain
     ClassLoaderModelLoader classLoaderModelLoader;
     try {
       classLoaderModelLoader =
-        descriptorLoaderRepository.get(classLoaderModelLoaderDescriptor.getId(), APP, ClassLoaderModelLoader.class);
+          descriptorLoaderRepository.get(classLoaderModelLoaderDescriptor.getId(), APP, ClassLoaderModelLoader.class);
     } catch (LoaderNotFoundException e) {
       throw new ArtifactDescriptorCreateException(invalidClassLoaderModelIdError(domainFolder,
                                                                                  classLoaderModelLoaderDescriptor));
@@ -191,7 +191,7 @@ public class DomainDescriptorFactory implements ArtifactDescriptorFactory<Domain
   }
 
   private Set<ArtifactPluginDescriptor> createArtifactPluginDescriptors(ClassLoaderModel classLoaderModel)
-    throws IOException {
+      throws IOException {
     Set<ArtifactPluginDescriptor> pluginDescriptors = new HashSet<>();
     for (BundleDependency bundleDependency : classLoaderModel.getDependencies()) {
       if (bundleDependency.getDescriptor().isPlugin()) {

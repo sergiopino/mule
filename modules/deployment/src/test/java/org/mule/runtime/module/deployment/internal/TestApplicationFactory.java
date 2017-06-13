@@ -46,14 +46,14 @@ public class TestApplicationFactory extends DefaultApplicationFactory {
   private boolean failOnDisposeApplication;
 
   private TestApplicationFactory(ApplicationClassLoaderBuilderFactory applicationClassLoaderBuilderFactory,
-                                ApplicationDescriptorFactory applicationDescriptorFactory,
-                                ArtifactPluginRepository artifactPluginRepository, DomainRepository domainRepository,
-                                ServiceRepository serviceRepository,
-                                ExtensionModelLoaderRepository extensionModelLoaderRepository,
-                                ClassLoaderRepository classLoaderRepository,
-                                PolicyTemplateClassLoaderBuilderFactory policyTemplateClassLoaderBuilderFactory,
-                                PluginDependenciesResolver pluginDependenciesResolver,
-                                ArtifactPluginDescriptorLoader artifactPluginDescriptorLoader) {
+                                 ApplicationDescriptorFactory applicationDescriptorFactory,
+                                 ArtifactPluginRepository artifactPluginRepository, DomainRepository domainRepository,
+                                 ServiceRepository serviceRepository,
+                                 ExtensionModelLoaderRepository extensionModelLoaderRepository,
+                                 ClassLoaderRepository classLoaderRepository,
+                                 PolicyTemplateClassLoaderBuilderFactory policyTemplateClassLoaderBuilderFactory,
+                                 PluginDependenciesResolver pluginDependenciesResolver,
+                                 ArtifactPluginDescriptorLoader artifactPluginDescriptorLoader) {
     super(applicationClassLoaderBuilderFactory, applicationDescriptorFactory, artifactPluginRepository, domainRepository,
           serviceRepository, extensionModelLoaderRepository, classLoaderRepository, policyTemplateClassLoaderBuilderFactory,
           pluginDependenciesResolver, artifactPluginDescriptorLoader);

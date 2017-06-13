@@ -342,71 +342,85 @@ public class ArtifactContextBuilder {
         if (extensionManagerFactory == null) {
           if (parentContext == null) {
             extensionManagerFactory =
-              new ArtifactExtensionManagerFactory(artifactPlugins, extensionModelLoaderRepository,
-                                                  new DefaultExtensionManagerFactory());
-          } else
-          {
+                new ArtifactExtensionManagerFactory(artifactPlugins, extensionModelLoaderRepository,
+                                                    new DefaultExtensionManagerFactory());
+          } else {
             //return new CompositeArtifactExtensionManager(applicationExtensionManager, policyExtensionManager);
             // TODO(pablo.kraan): domains - change the factor to receive the context instead of the parent artifact or get a reference t the real parent artifact
             extensionManagerFactory = new PolicyTemplateExtensionManagerFactory(new DeployableArtifact() {
 
-              @Override public void install() throws InstallException {
+              @Override
+              public void install() throws InstallException {
 
               }
 
-              @Override public void init() {
+              @Override
+              public void init() {
 
               }
 
-              @Override public void lazyInit() {
+              @Override
+              public void lazyInit() {
 
               }
 
-              @Override public void start() throws DeploymentStartException {
+              @Override
+              public void start() throws DeploymentStartException {
 
               }
 
-              @Override public void stop() {
+              @Override
+              public void stop() {
 
               }
 
-              @Override public void dispose() {
+              @Override
+              public void dispose() {
 
               }
 
-              @Override public MuleContext getMuleContext() {
+              @Override
+              public MuleContext getMuleContext() {
                 return parentContext;
               }
 
-              @Override public File getLocation() {
+              @Override
+              public File getLocation() {
                 return null;
               }
 
-              @Override public ConnectivityTestingService getConnectivityTestingService() {
+              @Override
+              public ConnectivityTestingService getConnectivityTestingService() {
                 return null;
               }
 
-              @Override public MetadataService getMetadataService() {
+              @Override
+              public MetadataService getMetadataService() {
                 return null;
               }
 
-              @Override public String getArtifactName() {
+              @Override
+              public String getArtifactName() {
                 return null;
               }
 
-              @Override public String getArtifactId() {
+              @Override
+              public String getArtifactId() {
                 return null;
               }
 
-              @Override public ArtifactDescriptor getDescriptor() {
+              @Override
+              public ArtifactDescriptor getDescriptor() {
                 return null;
               }
 
-              @Override public File[] getResourceFiles() {
+              @Override
+              public File[] getResourceFiles() {
                 return new File[0];
               }
 
-              @Override public ArtifactClassLoader getArtifactClassLoader() {
+              @Override
+              public ArtifactClassLoader getArtifactClassLoader() {
                 return null;
               }
             }, extensionModelLoaderRepository,

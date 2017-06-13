@@ -107,15 +107,16 @@ public class ApplicationClassLoaderBuilder extends AbstractArtifactClassLoaderBu
     return domainId + "/app/" + applicationName;
   }
 
-  @Override protected ClassLoaderLookupPolicy getParentLookupPolicy(ArtifactClassLoader parentClassLoader) {
+  @Override
+  protected ClassLoaderLookupPolicy getParentLookupPolicy(ArtifactClassLoader parentClassLoader) {
     Map<String, LookupStrategy> lookupStrategies = new HashMap<>();
 
     DomainDescriptor descriptor = parentClassLoader.getArtifactDescriptor();
-    descriptor .getClassLoaderModel().getExportedPackages().forEach(p -> lookupStrategies.put(p, PARENT_FIRST));
+    descriptor.getClassLoaderModel().getExportedPackages().forEach(p -> lookupStrategies.put(p, PARENT_FIRST));
 
     for (ArtifactPluginDescriptor artifactPluginDescriptor : descriptor.getPlugins()) {
       artifactPluginDescriptor.getClassLoaderModel().getExportedPackages()
-        .forEach(p -> lookupStrategies.put(p, PARENT_FIRST));
+          .forEach(p -> lookupStrategies.put(p, PARENT_FIRST));
     }
 
     return parentClassLoader.getClassLoaderLookupPolicy().extend(lookupStrategies);

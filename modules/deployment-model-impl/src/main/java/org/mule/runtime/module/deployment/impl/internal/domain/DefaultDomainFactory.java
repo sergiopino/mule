@@ -108,28 +108,29 @@ public class DefaultDomainFactory implements ArtifactFactory<Domain> {
     Set<ArtifactPluginDescriptor> pluginDescriptors = createArtifactPluginDescriptors(descriptor);
 
     List<ArtifactPluginDescriptor> applicationPluginDescriptors =
-      concat(artifactPluginRepository.getContainerArtifactPluginDescriptors().stream()
-               .filter(containerPluginDescriptor -> !pluginDescriptors.stream()
-                 .filter(appPluginDescriptor -> appPluginDescriptor.getName().equals(containerPluginDescriptor.getName()))
-                 .findAny().isPresent()),
-             pluginDescriptors.stream())
-        .collect(Collectors.toList());
+        concat(artifactPluginRepository.getContainerArtifactPluginDescriptors().stream()
+            .filter(containerPluginDescriptor -> !pluginDescriptors.stream()
+                .filter(appPluginDescriptor -> appPluginDescriptor.getName().equals(containerPluginDescriptor.getName()))
+                .findAny().isPresent()),
+               pluginDescriptors.stream())
+                   .collect(Collectors.toList());
 
     List<ArtifactPluginDescriptor> resolvedArtifactPluginDescriptors =
-      pluginDependenciesResolver.resolve(applicationPluginDescriptors);
+        pluginDependenciesResolver.resolve(applicationPluginDescriptors);
 
     DomainClassLoaderBuilder artifactClassLoaderBuilder =
-      domainClassLoaderBuilderFactory.createArtifactClassLoaderBuilder();
+        domainClassLoaderBuilderFactory.createArtifactClassLoaderBuilder();
     MuleDeployableArtifactClassLoader domainClassLoader =
-      artifactClassLoaderBuilder
-        .addArtifactPluginDescriptors(resolvedArtifactPluginDescriptors.toArray(new ArtifactPluginDescriptor[0]))
-        .setArtifactId(descriptor.getName()).setArtifactDescriptor(descriptor).build();
+        artifactClassLoaderBuilder
+            .addArtifactPluginDescriptors(resolvedArtifactPluginDescriptors.toArray(new ArtifactPluginDescriptor[0]))
+            .setArtifactId(descriptor.getName()).setArtifactDescriptor(descriptor).build();
 
 
     List<ArtifactPlugin> artifactPlugins =
-      createArtifactPluginList(domainClassLoader, resolvedArtifactPluginDescriptors);
+        createArtifactPluginList(domainClassLoader, resolvedArtifactPluginDescriptors);
 
-    DefaultMuleDomain defaultMuleDomain = new DefaultMuleDomain(descriptor, domainClassLoader, classLoaderRepository, serviceRepository, artifactPlugins);
+    DefaultMuleDomain defaultMuleDomain =
+        new DefaultMuleDomain(descriptor, domainClassLoader, classLoaderRepository, serviceRepository, artifactPlugins);
 
     if (muleContextListenerFactory != null) {
       defaultMuleDomain.setMuleContextListener(muleContextListenerFactory.create(descriptor.getName()));
@@ -164,20 +165,20 @@ public class DefaultDomainFactory implements ArtifactFactory<Domain> {
   private List<ArtifactPlugin> createArtifactPluginList(MuleDeployableArtifactClassLoader domainClassLoader,
                                                         List<ArtifactPluginDescriptor> plugins) {
     return plugins.stream()
-      .map(artifactPluginDescriptor -> new DefaultArtifactPlugin(getArtifactPluginId(domainClassLoader.getArtifactId(),
-                                                                                     artifactPluginDescriptor.getName()),
-                                                                 artifactPluginDescriptor, domainClassLoader
-                                                                   .getArtifactPluginClassLoaders().stream()
-                                                                   .filter(artifactClassLoader -> {
-                                                                     final String artifactPluginDescriptorName =
-                                                                       PLUGIN_CLASSLOADER_IDENTIFIER
-                                                                         + artifactPluginDescriptor.getName();
-                                                                     return artifactClassLoader
-                                                                       .getArtifactId()
-                                                                       .endsWith(artifactPluginDescriptorName);
-                                                                   })
-                                                                   .findFirst().get()))
-      .collect(toList());
+        .map(artifactPluginDescriptor -> new DefaultArtifactPlugin(getArtifactPluginId(domainClassLoader.getArtifactId(),
+                                                                                       artifactPluginDescriptor.getName()),
+                                                                   artifactPluginDescriptor, domainClassLoader
+                                                                       .getArtifactPluginClassLoaders().stream()
+                                                                       .filter(artifactClassLoader -> {
+                                                                         final String artifactPluginDescriptorName =
+                                                                             PLUGIN_CLASSLOADER_IDENTIFIER
+                                                                                 + artifactPluginDescriptor.getName();
+                                                                         return artifactClassLoader
+                                                                             .getArtifactId()
+                                                                             .endsWith(artifactPluginDescriptorName);
+                                                                       })
+                                                                       .findFirst().get()))
+        .collect(toList());
   }
 
   @Override

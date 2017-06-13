@@ -258,7 +258,10 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
 
   @BeforeClass
   public static void beforeClass() throws URISyntaxException {
-    barUtils1_0JarFile = new JarFileBuilder("barUtils1" ,new JarCompiler().compiling(getResourceFile("/org/bar1/BarUtils.java")).compile("bar-1.0.jar")).getArtifactFile();
+    barUtils1_0JarFile =
+        new JarFileBuilder("barUtils1",
+                           new JarCompiler().compiling(getResourceFile("/org/bar1/BarUtils.java")).compile("bar-1.0.jar"))
+                               .getArtifactFile();
 
     barUtils2_0JarFile = new JarCompiler().compiling(getResourceFile("/org/bar2/BarUtils.java")).compile("bar-2.0.jar");
 
@@ -2487,11 +2490,12 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
   public void deploysDomainWithPlugin() throws Exception {
     // TODO(pablo.kraan): domains - fix this test
     ApplicationFileBuilder echoPluginAppFileBuilder =
-      new ApplicationFileBuilder("dummyWithEchoPlugin").definedBy("app-with-echo-plugin-config.xml").deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
+        new ApplicationFileBuilder("dummyWithEchoPlugin").definedBy("app-with-echo-plugin-config.xml")
+            .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
 
     DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
-      .dependingOn(echoPlugin)
-      .containing(echoPluginAppFileBuilder);
+        .dependingOn(echoPlugin)
+        .containing(echoPluginAppFileBuilder);
 
     addPackedDomainFromBuilder(domainFileBuilder);
 
@@ -2723,7 +2727,9 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     addPackedDomainFromBuilder(emptyDomainFileBuilder);
 
     TestDomainFactory testDomainFactory =
-      TestDomainFactory.createDomainFactory(new DomainClassLoaderFactory(containerClassLoader.getClassLoader()), containerClassLoader, serviceManager, moduleRepository, createDescriptorLoaderRepository());
+        TestDomainFactory.createDomainFactory(new DomainClassLoaderFactory(containerClassLoader.getClassLoader()),
+                                              containerClassLoader, serviceManager, moduleRepository,
+                                              createDescriptorLoaderRepository());
     testDomainFactory.setMuleContextListenerFactory(new DeploymentMuleContextListenerFactory(domainDeploymentListener));
     testDomainFactory.setFailOnStopApplication();
 
@@ -2744,7 +2750,9 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     addPackedDomainFromBuilder(emptyDomainFileBuilder);
 
     TestDomainFactory testDomainFactory =
-      TestDomainFactory.createDomainFactory(new DomainClassLoaderFactory(containerClassLoader.getClassLoader()), containerClassLoader, serviceManager, moduleRepository, createDescriptorLoaderRepository());
+        TestDomainFactory.createDomainFactory(new DomainClassLoaderFactory(containerClassLoader.getClassLoader()),
+                                              containerClassLoader, serviceManager, moduleRepository,
+                                              createDescriptorLoaderRepository());
     testDomainFactory.setMuleContextListenerFactory(new DeploymentMuleContextListenerFactory(domainDeploymentListener));
     testDomainFactory.setFailOnDisposeApplication();
     deploymentService.setDomainFactory(testDomainFactory);
@@ -3911,7 +3919,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     addPackedDomainFromBuilder(artifactFileBuilder, null);
   }
 
-    private void addPackedDomainFromBuilder(TestArtifactDescriptor artifactFileBuilder, String targetName) throws Exception {
+  private void addPackedDomainFromBuilder(TestArtifactDescriptor artifactFileBuilder, String targetName) throws Exception {
     addArchive(domainsDir, artifactFileBuilder.getArtifactFile().toURI(), targetName);
   }
 
