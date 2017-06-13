@@ -23,11 +23,9 @@ import org.mule.runtime.api.component.location.Location;
 import org.mule.runtime.api.config.custom.ServiceConfigurator;
 import org.mule.runtime.api.exception.MuleRuntimeException;
 import org.mule.runtime.api.lifecycle.InitialisationException;
-import org.mule.runtime.api.metadata.MetadataService;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.config.ConfigurationBuilder;
 import org.mule.runtime.core.api.config.ConfigurationException;
-import org.mule.runtime.core.api.connectivity.ConnectivityTestingService;
 import org.mule.runtime.core.api.context.MuleContextBuilder;
 import org.mule.runtime.core.api.context.notification.MuleContextListener;
 import org.mule.runtime.core.config.bootstrap.ArtifactType;
@@ -35,16 +33,12 @@ import org.mule.runtime.core.config.builders.SimpleConfigurationBuilder;
 import org.mule.runtime.core.context.DefaultMuleContextFactory;
 import org.mule.runtime.core.policy.PolicyProvider;
 import org.mule.runtime.deployment.model.api.DeployableArtifact;
-import org.mule.runtime.deployment.model.api.DeploymentStartException;
-import org.mule.runtime.deployment.model.api.InstallException;
 import org.mule.runtime.deployment.model.api.artifact.ArtifactConfigurationProcessor;
 import org.mule.runtime.deployment.model.api.artifact.ArtifactContext;
 import org.mule.runtime.deployment.model.api.artifact.ArtifactContextConfiguration;
 import org.mule.runtime.deployment.model.api.domain.Domain;
 import org.mule.runtime.deployment.model.api.plugin.ArtifactPlugin;
-import org.mule.runtime.module.artifact.classloader.ArtifactClassLoader;
 import org.mule.runtime.module.artifact.classloader.ClassLoaderRepository;
-import org.mule.runtime.module.artifact.descriptor.ArtifactDescriptor;
 import org.mule.runtime.module.artifact.serializer.ArtifactObjectSerializer;
 import org.mule.runtime.module.deployment.impl.internal.application.ApplicationMuleContextBuilder;
 import org.mule.runtime.module.deployment.impl.internal.domain.DomainMuleContextBuilder;
@@ -75,8 +69,8 @@ public class ArtifactContextBuilder {
   protected static final String MULE_CONTEXT_ARTIFACT_PROPERTIES_CANNOT_BE_NULL =
       "MuleContext artifact properties cannot be null";
   protected static final String INSTALLATION_DIRECTORY_MUST_BE_A_DIRECTORY = "installation directory must be a directory";
-  protected static final String ONLY_APPLICATIONS_ARE_ALLOWED_TO_HAVE_A_PARENT_CONTEXT =
-      "Only applications are allowed to have a parent context";
+  protected static final String ONLY_APPLICATIONS_ARE_ALLOWED_TO_HAVE_A_PARENT_ARTIFACT =
+      "Only applications are allowed to have a parent artifact";
   protected static final String SERVICE_REPOSITORY_CANNOT_BE_NULL = "serviceRepository cannot be null";
   protected static final String EXTENSION_MODEL_LOADER_REPOSITORY_CANNOT_BE_NULL =
       "extensionModelLoaderRepository cannot be null";
@@ -104,6 +98,7 @@ public class ArtifactContextBuilder {
   private PolicyProvider policyProvider;
   private List<ServiceConfigurator> serviceConfigurators = new ArrayList<>();
   private ExtensionManagerFactory extensionManagerFactory;
+  private DeployableArtifact parentArtifact;
 
   private ArtifactContextBuilder() {}
 
@@ -160,14 +155,14 @@ public class ArtifactContextBuilder {
   }
 
   /**
-   * Allows to define a {@code MuleContext} which resources will be available to the context to be created. This is the mechanism
+   * Allows to define a parent artifact which resources will be available to the context to be created. This is the mechanism
    * using for {@link Domain}s to define shared resources.
    *
-   * @param parentContext {@code MuleContext} that is parent of the one to be created.
+   * @param parentArtifact artifact parent of the one being created.
    * @return the builder
    */
-  public ArtifactContextBuilder setParentContext(MuleContext parentContext) {
-    this.parentContext = parentContext;
+  public ArtifactContextBuilder serParenArtifact(DeployableArtifact parentArtifact) {
+    this.parentArtifact = parentArtifact;
     return this;
   }
 
@@ -331,97 +326,19 @@ public class ArtifactContextBuilder {
   public ArtifactContext build() throws InitialisationException, ConfigurationException {
     checkState(executionClassLoader != null, EXECUTION_CLASSLOADER_WAS_NOT_SET);
     checkState(classLoaderRepository != null, CLASS_LOADER_REPOSITORY_WAS_NOT_SET);
-    checkState(APP.equals(artifactType) || parentContext == null, ONLY_APPLICATIONS_ARE_ALLOWED_TO_HAVE_A_PARENT_CONTEXT);
+    checkState(APP.equals(artifactType) || parentArtifact == null, ONLY_APPLICATIONS_ARE_ALLOWED_TO_HAVE_A_PARENT_ARTIFACT);
     try {
       return withContextClassLoader(executionClassLoader, () -> {
         List<ConfigurationBuilder> builders = new LinkedList<>();
         builders.addAll(additionalBuilders);
         builders.add(new ArtifactBootstrapServiceDiscovererConfigurationBuilder(artifactPlugins));
         if (extensionManagerFactory == null) {
-          if (parentContext == null) {
+          if (parentArtifact == null) {
             extensionManagerFactory =
                 new ArtifactExtensionManagerFactory(artifactPlugins, extensionModelLoaderRepository,
                                                     new DefaultExtensionManagerFactory());
           } else {
-            //return new CompositeArtifactExtensionManager(applicationExtensionManager, policyExtensionManager);
-            // TODO(pablo.kraan): domains - change the factory to receive the context instead of the parent artifact or get a reference t the real parent artifact
-            extensionManagerFactory = new CompositeArtifactExtensionManagerFactory(new DeployableArtifact() {
-
-              @Override
-              public void install() throws InstallException {
-
-              }
-
-              @Override
-              public void init() {
-
-              }
-
-              @Override
-              public void lazyInit() {
-
-              }
-
-              @Override
-              public void start() throws DeploymentStartException {
-
-              }
-
-              @Override
-              public void stop() {
-
-              }
-
-              @Override
-              public void dispose() {
-
-              }
-
-              @Override
-              public MuleContext getMuleContext() {
-                return parentContext;
-              }
-
-              @Override
-              public File getLocation() {
-                return null;
-              }
-
-              @Override
-              public ConnectivityTestingService getConnectivityTestingService() {
-                return null;
-              }
-
-              @Override
-              public MetadataService getMetadataService() {
-                return null;
-              }
-
-              @Override
-              public String getArtifactName() {
-                return null;
-              }
-
-              @Override
-              public String getArtifactId() {
-                return null;
-              }
-
-              @Override
-              public ArtifactDescriptor getDescriptor() {
-                return null;
-              }
-
-              @Override
-              public File[] getResourceFiles() {
-                return new File[0];
-              }
-
-              @Override
-              public ArtifactClassLoader getArtifactClassLoader() {
-                return null;
-              }
-            }, extensionModelLoaderRepository,
+            extensionManagerFactory = new CompositeArtifactExtensionManagerFactory(parentArtifact, extensionModelLoaderRepository,
                                                                                    artifactPlugins,
                                                                                    new DefaultExtensionManagerFactory());
           }

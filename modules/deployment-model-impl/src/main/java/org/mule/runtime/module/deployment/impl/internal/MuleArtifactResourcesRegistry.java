@@ -121,7 +121,7 @@ public class MuleArtifactResourcesRegistry {
    */
   private MuleArtifactResourcesRegistry(ModuleRepository moduleRepository) {
     containerClassLoader =
-      new ContainerClassLoaderFactory(moduleRepository).createContainerClassLoader(getClass().getClassLoader());
+        new ContainerClassLoaderFactory(moduleRepository).createContainerClassLoader(getClass().getClassLoader());
     artifactClassLoaderManager = new DefaultClassLoaderManager();
 
     domainManager = new DefaultDomainManager();

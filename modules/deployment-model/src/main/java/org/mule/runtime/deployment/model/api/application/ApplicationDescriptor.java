@@ -95,7 +95,8 @@ public class ApplicationDescriptor extends DeployableArtifactDescriptor {
     this.artifactDeclaration = artifactDeclaration;
   }
 
-  @Override protected List<String> getDefaultConfigResources() {
+  @Override
+  protected List<String> getDefaultConfigResources() {
     return ImmutableList.<String>builder().add(getAppConfigFolderPath() + DEFAULT_CONFIGURATION_RESOURCE).build();
   }
 }

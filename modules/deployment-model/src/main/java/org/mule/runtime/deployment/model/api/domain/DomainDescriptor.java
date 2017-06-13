@@ -21,7 +21,8 @@ public class DomainDescriptor extends DeployableArtifactDescriptor {
 
   public static final String DEFAULT_DOMAIN_NAME = "default";
   public static final String DEFAULT_CONFIGURATION_RESOURCE = "mule-domain-config.xml";
-  public static final String DEFAULT_CONFIGURATION_RESOURCE_LOCATION = Paths.get("mule", DEFAULT_CONFIGURATION_RESOURCE).toString();
+  public static final String DEFAULT_CONFIGURATION_RESOURCE_LOCATION =
+      Paths.get("mule", DEFAULT_CONFIGURATION_RESOURCE).toString();
   public static final String MULE_DOMAIN_JSON_LOCATION = Paths.get("META-INF", "mule-artifact", "mule-domain.json").toString();
 
   /**
@@ -33,7 +34,8 @@ public class DomainDescriptor extends DeployableArtifactDescriptor {
     super(name);
   }
 
-  @Override protected List<String> getDefaultConfigResources() {
+  @Override
+  protected List<String> getDefaultConfigResources() {
     return ImmutableList.<String>builder().add(getAppConfigFolderPath() + DEFAULT_CONFIGURATION_RESOURCE).build();
   }
 }
