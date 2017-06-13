@@ -69,9 +69,9 @@ import static org.mule.runtime.core.api.util.ClassUtils.withContextClassLoader;
 import static org.mule.runtime.core.config.bootstrap.ClassLoaderRegistryBootstrapDiscoverer.BOOTSTRAP_PROPERTIES;
 import static org.mule.runtime.deployment.model.api.application.ApplicationStatus.DESTROYED;
 import static org.mule.runtime.deployment.model.api.application.ApplicationStatus.STOPPED;
-import static org.mule.runtime.deployment.model.api.domain.Domain.DEFAULT_DOMAIN_NAME;
-import static org.mule.runtime.deployment.model.api.domain.Domain.DOMAIN_CONFIG_FILE;
-import static org.mule.runtime.deployment.model.api.domain.Domain.DOMAIN_CONFIG_FILE_LOCATION;
+import static org.mule.runtime.deployment.model.api.domain.DomainDescriptor.DEFAULT_CONFIGURATION_RESOURCE;
+import static org.mule.runtime.deployment.model.api.domain.DomainDescriptor.DEFAULT_CONFIGURATION_RESOURCE_LOCATION;
+import static org.mule.runtime.deployment.model.api.domain.DomainDescriptor.DEFAULT_DOMAIN_NAME;
 import static org.mule.runtime.deployment.model.api.plugin.ArtifactPluginDescriptor.EXTENSION_BUNDLE_TYPE;
 import static org.mule.runtime.deployment.model.api.plugin.MavenClassLoaderConstants.EXPORTED_PACKAGES;
 import static org.mule.runtime.deployment.model.api.plugin.MavenClassLoaderConstants.EXPORTED_RESOURCES;
@@ -1052,7 +1052,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     // change shared config name to use a wrong name
     File domainConfigFile =
         new File(domainsDir + "/" + sharedBundleDomainFileBuilder.getDeployedPath(),
-                 Paths.get("mule", DOMAIN_CONFIG_FILE).toString());
+                 Paths.get("mule", DEFAULT_CONFIGURATION_RESOURCE).toString());
     String correctDomainConfigContent = IOUtils.toString(new FileInputStream(domainConfigFile));
     String wrongDomainFileContext = correctDomainConfigContent.replace("test-shared-config", "test-shared-config-wrong");
     copyInputStreamToFile(new ByteArrayInputStream(wrongDomainFileContext.getBytes()), domainConfigFile);
@@ -1975,7 +1975,6 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
 
   @Test
   public void deploysDomainWithSharedLibPrecedenceOverApplicationSharedLib() throws Exception {
-    // TODO(pablo.kraan): domains - fix this test
     final String domainId = "shared-lib";
     final ApplicationFileBuilder applicationFileBuilder = new ApplicationFileBuilder("shared-lib-precedence-app")
         .definedBy("app-shared-lib-precedence-config.xml")
@@ -2488,7 +2487,6 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
 
   @Test
   public void deploysDomainWithPlugin() throws Exception {
-    // TODO(pablo.kraan): domains - fix this test
     ApplicationFileBuilder echoPluginAppFileBuilder =
         new ApplicationFileBuilder("dummyWithEchoPlugin").definedBy("app-with-echo-plugin-config.xml")
             .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
@@ -3561,7 +3559,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
 
     reset(domainDeploymentListener);
 
-    File originalConfigFile = new File(domainsDir + "/incompleteDomain", DOMAIN_CONFIG_FILE_LOCATION);
+    File originalConfigFile = new File(domainsDir + "/incompleteDomain", DEFAULT_CONFIGURATION_RESOURCE_LOCATION);
     URL url = getClass().getResource("/empty-domain-config.xml");
     File newConfigFile = new File(url.toURI());
     copyFile(newConfigFile, originalConfigFile);

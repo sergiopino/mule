@@ -10,6 +10,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mule.runtime.deployment.model.api.domain.DomainDescriptor.DEFAULT_DOMAIN_NAME;
 import org.mule.runtime.core.api.config.MuleProperties;
 import org.mule.runtime.core.api.util.FileUtils;
 import org.mule.runtime.module.artifact.classloader.ClassLoaderLookupPolicy;
@@ -35,7 +36,6 @@ import org.junit.rules.TemporaryFolder;
 public class MuleSharedDomainClassLoaderTestCase extends AbstractMuleTestCase {
 
   public static final String RESOURCE_FILE_NAME = "file.properties";
-  public static final String DEFAULT_DOMAIN_NAME = "default";
   @ClassRule
   public static TemporaryFolder temporaryFolder = new TemporaryFolder();
   @Rule

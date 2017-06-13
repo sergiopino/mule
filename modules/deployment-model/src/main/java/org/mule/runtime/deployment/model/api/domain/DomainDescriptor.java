@@ -19,9 +19,9 @@ import java.util.List;
  */
 public class DomainDescriptor extends DeployableArtifactDescriptor {
 
-  // TODO(pablo.kraan): domains - remove constant duplication (is on Domain)
+  public static final String DEFAULT_DOMAIN_NAME = "default";
   public static final String DEFAULT_CONFIGURATION_RESOURCE = "mule-domain-config.xml";
-  public static final String DEFAULT_CONFIGURATION_RESOURCE_LOCATION = Paths.get("mule", "mule-config.xml").toString();
+  public static final String DEFAULT_CONFIGURATION_RESOURCE_LOCATION = Paths.get("mule", DEFAULT_CONFIGURATION_RESOURCE).toString();
   public static final String MULE_DOMAIN_JSON_LOCATION = Paths.get("META-INF", "mule-artifact", "mule-domain.json").toString();
 
   /**

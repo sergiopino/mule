@@ -12,6 +12,7 @@ import static org.mule.runtime.api.util.Preconditions.checkArgument;
 import static org.mule.runtime.core.api.util.ClassUtils.withContextClassLoader;
 import static org.mule.runtime.core.config.bootstrap.ArtifactType.DOMAIN;
 import static org.mule.runtime.core.internal.util.splash.SplashScreen.miniSplash;
+import static org.mule.runtime.deployment.model.api.domain.DomainDescriptor.DEFAULT_CONFIGURATION_RESOURCE_LOCATION;
 import static org.mule.runtime.module.deployment.impl.internal.artifact.ArtifactContextBuilder.newBuilder;
 
 import org.mule.runtime.api.exception.MuleException;
@@ -71,7 +72,7 @@ public class DefaultMuleDomain implements Domain {
   }
 
   private void refreshClassLoaderAndLoadConfigResourceFile() {
-    URL resource = deploymentClassLoader.findLocalResource(DOMAIN_CONFIG_FILE_LOCATION);
+    URL resource = deploymentClassLoader.findLocalResource(DEFAULT_CONFIGURATION_RESOURCE_LOCATION);
     if (resource != null) {
       try {
         this.configResourceFile = new File(resource.toURI());

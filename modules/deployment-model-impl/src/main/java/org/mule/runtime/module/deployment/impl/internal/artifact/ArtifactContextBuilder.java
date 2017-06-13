@@ -345,7 +345,7 @@ public class ArtifactContextBuilder {
                                                     new DefaultExtensionManagerFactory());
           } else {
             //return new CompositeArtifactExtensionManager(applicationExtensionManager, policyExtensionManager);
-            // TODO(pablo.kraan): domains - change the factor to receive the context instead of the parent artifact or get a reference t the real parent artifact
+            // TODO(pablo.kraan): domains - change the factory to receive the context instead of the parent artifact or get a reference t the real parent artifact
             extensionManagerFactory = new PolicyTemplateExtensionManagerFactory(new DeployableArtifact() {
 
               @Override

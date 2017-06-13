@@ -13,7 +13,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static org.mule.runtime.api.util.Preconditions.checkArgument;
 import static org.mule.runtime.deployment.model.api.DeployableArtifactDescriptor.DEFAULT_DEPLOY_PROPERTIES_RESOURCE;
-import static org.mule.runtime.deployment.model.api.domain.Domain.DOMAIN_CONFIG_FILE;
+import static org.mule.runtime.deployment.model.api.domain.DomainDescriptor.DEFAULT_CONFIGURATION_RESOURCE;
 import static org.mule.runtime.deployment.model.api.domain.DomainDescriptor.MULE_DOMAIN_JSON_LOCATION;
 import static org.mule.runtime.deployment.model.api.plugin.MavenClassLoaderConstants.EXPORTED_RESOURCES;
 import static org.mule.runtime.deployment.model.api.plugin.MavenClassLoaderConstants.MAVEN;
@@ -86,7 +86,7 @@ public class DomainFileBuilder extends DeployableFileBuilder<DomainFileBuilder> 
   public DomainFileBuilder definedBy(String configFile) {
     checkImmutable();
     checkArgument(!StringUtils.isEmpty(configFile), "Config file cannot be empty");
-    this.resources.add(new ZipResource(configFile, "mule" + File.separator + DOMAIN_CONFIG_FILE));
+    this.resources.add(new ZipResource(configFile, "mule" + File.separator + DEFAULT_CONFIGURATION_RESOURCE));
 
     return this;
   }
@@ -152,7 +152,7 @@ public class DomainFileBuilder extends DeployableFileBuilder<DomainFileBuilder> 
 
   @Override
   public String getConfigFile() {
-    return DOMAIN_CONFIG_FILE;
+    return DEFAULT_CONFIGURATION_RESOURCE;
   }
 
   private File createApplicationJsonDescriptorFile(Optional<Boolean> redeploymentEnabled,

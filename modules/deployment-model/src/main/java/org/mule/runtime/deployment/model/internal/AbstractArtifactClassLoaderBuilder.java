@@ -147,7 +147,10 @@ public abstract class AbstractArtifactClassLoaderBuilder<T extends AbstractArtif
     return artifactClassLoader;
   }
 
-  // TODO(pablo.kraan): domains - add javadoc
+  /**
+   * @param parentClassLoader parent class loader for the creates artifact class loader
+   * @return the lookup policy to use on the created artifact class loader
+   */
   protected ClassLoaderLookupPolicy getParentLookupPolicy(ArtifactClassLoader parentClassLoader) {
     return parentClassLoader.getClassLoaderLookupPolicy();
   }
