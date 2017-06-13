@@ -10,7 +10,7 @@ package org.mule.runtime.module.deployment.impl.internal.policy;
 import static org.mule.runtime.api.util.Preconditions.checkArgument;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.extension.ExtensionManager;
-import org.mule.runtime.deployment.model.api.application.Application;
+import org.mule.runtime.deployment.model.api.DeployableArtifact;
 import org.mule.runtime.deployment.model.api.plugin.ArtifactPlugin;
 import org.mule.runtime.deployment.model.api.policy.PolicyTemplate;
 import org.mule.runtime.module.extension.internal.loader.ExtensionModelLoaderRepository;
@@ -21,33 +21,34 @@ import java.util.List;
 /**
  * Creates extension managers for {@link PolicyTemplate} artifacts
  */
+// TODO(pablo.kraan): domains - move this class to another package
+// TODO(pablo.kraan): domains - rename this class to make it more generic
 public class PolicyTemplateExtensionManagerFactory extends ArtifactExtensionManagerFactory {
 
-  private final Application application;
+  private final DeployableArtifact parentArtifact;
 
   /**
    * Creates a new factory
-   *
-   * @param application application on which the policies are applied. Non null.
+   *  @param parentArtifact application on which the policies are applied. Non null.
    * @param extensionModelLoaderRepository {@link ExtensionModelLoaderRepository} with the available extension loaders. Non null.
    * @param artifactPlugins artifact plugins deployed inside the artifact. Non null.
    * @param extensionManagerFactory creates the {@link ExtensionManager} for the artifact. Non null
    */
-  public PolicyTemplateExtensionManagerFactory(Application application,
+  public PolicyTemplateExtensionManagerFactory(DeployableArtifact parentArtifact,
                                                ExtensionModelLoaderRepository extensionModelLoaderRepository,
                                                List<ArtifactPlugin> artifactPlugins,
                                                ExtensionManagerFactory extensionManagerFactory) {
     super(artifactPlugins, extensionModelLoaderRepository, extensionManagerFactory);
 
-    checkArgument(application != null, "application cannot be null");
-    this.application = application;
+    checkArgument(parentArtifact != null, "application cannot be null");
+    this.parentArtifact = parentArtifact;
   }
 
   @Override
   public ExtensionManager create(MuleContext muleContext) {
     ExtensionManager policyExtensionManager = super.create(muleContext);
 
-    ExtensionManager applicationExtensionManager = application.getMuleContext().getExtensionManager();
+    ExtensionManager applicationExtensionManager = parentArtifact.getMuleContext().getExtensionManager();
 
     return new CompositeArtifactExtensionManager(applicationExtensionManager, policyExtensionManager);
   }

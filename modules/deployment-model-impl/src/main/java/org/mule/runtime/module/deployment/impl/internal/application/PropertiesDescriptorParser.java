@@ -24,6 +24,7 @@ import java.util.Properties;
 
 import org.apache.commons.lang.BooleanUtils;
 
+// TODO(pablo.kraan): domains - remove this class after clean up
 public class PropertiesDescriptorParser {
 
   public static final String PROPERTY_REDEPLOYMENT_ENABLED = "redeployment.enabled";

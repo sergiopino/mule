@@ -45,7 +45,7 @@ public class TestApplicationFactory extends DefaultApplicationFactory {
   private boolean failOnStopApplication;
   private boolean failOnDisposeApplication;
 
-  public TestApplicationFactory(ApplicationClassLoaderBuilderFactory applicationClassLoaderBuilderFactory,
+  private TestApplicationFactory(ApplicationClassLoaderBuilderFactory applicationClassLoaderBuilderFactory,
                                 ApplicationDescriptorFactory applicationDescriptorFactory,
                                 ArtifactPluginRepository artifactPluginRepository, DomainRepository domainRepository,
                                 ServiceRepository serviceRepository,

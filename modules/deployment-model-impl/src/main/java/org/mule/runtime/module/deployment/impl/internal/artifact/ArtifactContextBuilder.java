@@ -15,33 +15,41 @@ import static org.mule.runtime.core.api.config.MuleProperties.APP_HOME_DIRECTORY
 import static org.mule.runtime.core.api.config.MuleProperties.APP_NAME_PROPERTY;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_CLASSLOADER_REPOSITORY;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_POLICY_PROVIDER;
-import static org.mule.runtime.core.config.bootstrap.ArtifactType.APP;
 import static org.mule.runtime.core.api.util.ClassUtils.withContextClassLoader;
 import static org.mule.runtime.core.api.util.UUID.getUUID;
+import static org.mule.runtime.core.config.bootstrap.ArtifactType.APP;
 import org.mule.runtime.api.app.declaration.ArtifactDeclaration;
 import org.mule.runtime.api.component.location.Location;
 import org.mule.runtime.api.config.custom.ServiceConfigurator;
 import org.mule.runtime.api.exception.MuleRuntimeException;
 import org.mule.runtime.api.lifecycle.InitialisationException;
+import org.mule.runtime.api.metadata.MetadataService;
 import org.mule.runtime.core.api.MuleContext;
 import org.mule.runtime.core.api.config.ConfigurationBuilder;
 import org.mule.runtime.core.api.config.ConfigurationException;
+import org.mule.runtime.core.api.connectivity.ConnectivityTestingService;
 import org.mule.runtime.core.api.context.MuleContextBuilder;
 import org.mule.runtime.core.api.context.notification.MuleContextListener;
 import org.mule.runtime.core.config.bootstrap.ArtifactType;
 import org.mule.runtime.core.config.builders.SimpleConfigurationBuilder;
 import org.mule.runtime.core.context.DefaultMuleContextFactory;
 import org.mule.runtime.core.policy.PolicyProvider;
+import org.mule.runtime.deployment.model.api.DeployableArtifact;
+import org.mule.runtime.deployment.model.api.DeploymentStartException;
+import org.mule.runtime.deployment.model.api.InstallException;
 import org.mule.runtime.deployment.model.api.artifact.ArtifactConfigurationProcessor;
 import org.mule.runtime.deployment.model.api.artifact.ArtifactContext;
 import org.mule.runtime.deployment.model.api.artifact.ArtifactContextConfiguration;
 import org.mule.runtime.deployment.model.api.domain.Domain;
 import org.mule.runtime.deployment.model.api.plugin.ArtifactPlugin;
+import org.mule.runtime.module.artifact.classloader.ArtifactClassLoader;
 import org.mule.runtime.module.artifact.classloader.ClassLoaderRepository;
+import org.mule.runtime.module.artifact.descriptor.ArtifactDescriptor;
 import org.mule.runtime.module.artifact.serializer.ArtifactObjectSerializer;
 import org.mule.runtime.module.deployment.impl.internal.application.ApplicationMuleContextBuilder;
 import org.mule.runtime.module.deployment.impl.internal.domain.DomainMuleContextBuilder;
 import org.mule.runtime.module.deployment.impl.internal.policy.ArtifactExtensionManagerFactory;
+import org.mule.runtime.module.deployment.impl.internal.policy.PolicyTemplateExtensionManagerFactory;
 import org.mule.runtime.module.extension.internal.loader.ExtensionModelLoaderRepository;
 import org.mule.runtime.module.extension.internal.manager.DefaultExtensionManagerFactory;
 import org.mule.runtime.module.extension.internal.manager.ExtensionManagerFactory;
@@ -330,10 +338,82 @@ public class ArtifactContextBuilder {
         List<ConfigurationBuilder> builders = new LinkedList<>();
         builders.addAll(additionalBuilders);
         builders.add(new ArtifactBootstrapServiceDiscovererConfigurationBuilder(artifactPlugins));
+        // TODO(pablo.kraan): domains - need to create a composite extension manager for the app
         if (extensionManagerFactory == null) {
-          extensionManagerFactory =
+          if (parentContext == null) {
+            extensionManagerFactory =
               new ArtifactExtensionManagerFactory(artifactPlugins, extensionModelLoaderRepository,
                                                   new DefaultExtensionManagerFactory());
+          } else
+          {
+            //return new CompositeArtifactExtensionManager(applicationExtensionManager, policyExtensionManager);
+            // TODO(pablo.kraan): domains - change the factor to receive the context instead of the parent artifact or get a reference t the real parent artifact
+            extensionManagerFactory = new PolicyTemplateExtensionManagerFactory(new DeployableArtifact() {
+
+              @Override public void install() throws InstallException {
+
+              }
+
+              @Override public void init() {
+
+              }
+
+              @Override public void lazyInit() {
+
+              }
+
+              @Override public void start() throws DeploymentStartException {
+
+              }
+
+              @Override public void stop() {
+
+              }
+
+              @Override public void dispose() {
+
+              }
+
+              @Override public MuleContext getMuleContext() {
+                return parentContext;
+              }
+
+              @Override public File getLocation() {
+                return null;
+              }
+
+              @Override public ConnectivityTestingService getConnectivityTestingService() {
+                return null;
+              }
+
+              @Override public MetadataService getMetadataService() {
+                return null;
+              }
+
+              @Override public String getArtifactName() {
+                return null;
+              }
+
+              @Override public String getArtifactId() {
+                return null;
+              }
+
+              @Override public ArtifactDescriptor getDescriptor() {
+                return null;
+              }
+
+              @Override public File[] getResourceFiles() {
+                return new File[0];
+              }
+
+              @Override public ArtifactClassLoader getArtifactClassLoader() {
+                return null;
+              }
+            }, extensionModelLoaderRepository,
+                                                                                artifactPlugins,
+                                                                                new DefaultExtensionManagerFactory());
+          }
+
         }
         builders.add(new ArtifactExtensionManagerConfigurationBuilder(artifactPlugins,
                                                                       extensionManagerFactory));

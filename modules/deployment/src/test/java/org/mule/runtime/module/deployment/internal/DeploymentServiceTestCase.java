@@ -93,7 +93,6 @@ import static org.mule.runtime.module.deployment.internal.MuleDeploymentService.
 import static org.mule.runtime.module.deployment.internal.TestApplicationFactory.createTestApplicationFactory;
 import static org.mule.runtime.module.service.ServiceDescriptorFactory.SERVICE_PROVIDER_CLASS_NAME;
 import static org.mule.tck.junit4.AbstractMuleContextTestCase.TEST_MESSAGE;
-
 import org.mule.runtime.api.config.custom.CustomizationService;
 import org.mule.runtime.api.deployment.meta.MuleArtifactLoaderDescriptor;
 import org.mule.runtime.api.deployment.meta.MulePluginModel.MulePluginModelBuilder;
@@ -112,14 +111,12 @@ import org.mule.runtime.core.api.construct.Flow;
 import org.mule.runtime.core.api.registry.MuleRegistry;
 import org.mule.runtime.core.api.util.FileUtils;
 import org.mule.runtime.core.api.util.IOUtils;
+import org.mule.runtime.core.api.util.concurrent.Latch;
 import org.mule.runtime.core.config.StartupContext;
 import org.mule.runtime.core.exception.MessagingException;
 import org.mule.runtime.core.policy.PolicyParametrization;
 import org.mule.runtime.core.policy.PolicyPointcut;
 import org.mule.runtime.core.registry.SpiServiceRegistry;
-import org.mule.runtime.core.api.util.FileUtils;
-import org.mule.runtime.core.api.util.IOUtils;
-import org.mule.runtime.core.api.util.concurrent.Latch;
 import org.mule.runtime.deployment.model.api.application.Application;
 import org.mule.runtime.deployment.model.api.application.ApplicationStatus;
 import org.mule.runtime.deployment.model.api.domain.Domain;
@@ -223,8 +220,10 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
   @Parameterized.Parameters(name = "Parallel: {0}")
   public static List<Object[]> parameters() {
     return asList(new Object[][] {
-        {false},
-        {true}
+        {false}
+        // TODO(pablo.kraan): domains - revert this change
+        // ,
+        // {true}
     });
   }
 
@@ -259,7 +258,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
 
   @BeforeClass
   public static void beforeClass() throws URISyntaxException {
-    barUtils1_0JarFile = new JarCompiler().compiling(getResourceFile("/org/bar1/BarUtils.java")).compile("bar-1.0.jar");
+    barUtils1_0JarFile = new JarFileBuilder("barUtils1" ,new JarCompiler().compiling(getResourceFile("/org/bar1/BarUtils.java")).compile("bar-1.0.jar")).getArtifactFile();
 
     barUtils2_0JarFile = new JarCompiler().compiling(getResourceFile("/org/bar2/BarUtils.java")).compile("bar-2.0.jar");
 
@@ -1973,14 +1972,15 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
 
   @Test
   public void deploysDomainWithSharedLibPrecedenceOverApplicationSharedLib() throws Exception {
+    // TODO(pablo.kraan): domains - fix this test
     final String domainId = "shared-lib";
     final ApplicationFileBuilder applicationFileBuilder = new ApplicationFileBuilder("shared-lib-precedence-app")
         .definedBy("app-shared-lib-precedence-config.xml")
-        .dependingOnSharedLibrary(new JarFileBuilder("bar-utils2", barUtils2_0JarFile))
+        .dependingOnSharedLibrary(new JarFileBuilder("barUtils2", barUtils2_0JarFile))
         .containingClass(pluginEcho1TestClassFile, "org/foo/Plugin1Echo.class")
         .deployedWith(PROPERTY_DOMAIN, domainId);
     final DomainFileBuilder domainFileBuilder =
-        new DomainFileBuilder(domainId).dependingOn(new JarFileBuilder("barUtils1_0", barUtils1_0JarFile))
+        new DomainFileBuilder(domainId).dependingOnSharedLibrary(new JarFileBuilder("barUtils1", barUtils1_0JarFile))
             .containing(applicationFileBuilder);
 
     addPackedDomainFromBuilder(domainFileBuilder);
@@ -2386,48 +2386,48 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
   public void redeploysDomainZipDeployedOnStartup() throws Exception {
     startDeployment();
 
-    addPackedDomainFromBuilder(emptyAppFileBuilder);
-    File dummyDomainFile = new File(domainsDir, emptyAppFileBuilder.getZipPath());
+    addPackedDomainFromBuilder(emptyDomainFileBuilder);
+    File dummyDomainFile = new File(domainsDir, emptyDomainFileBuilder.getZipPath());
     long firstFileTimestamp = dummyDomainFile.lastModified();
 
-    assertDeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
+    assertDeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
 
-    assertDomainDir(NONE, new String[] {DEFAULT_DOMAIN_NAME, emptyAppFileBuilder.getId()}, true);
+    assertDomainDir(NONE, new String[] {DEFAULT_DOMAIN_NAME, emptyDomainFileBuilder.getId()}, true);
     assertEquals("Domain has not been properly registered with Mule", 2, deploymentService.getDomains().size());
 
     reset(domainDeploymentListener);
 
-    addPackedDomainFromBuilder(emptyAppFileBuilder);
+    addPackedDomainFromBuilder(emptyDomainFileBuilder);
     alterTimestampIfNeeded(dummyDomainFile, firstFileTimestamp);
 
-    assertUndeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
-    assertDeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
+    assertUndeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
+    assertDeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
     assertEquals("Domain has not been properly registered with Mule", 2, deploymentService.getDomains().size());
-    assertDomainDir(NONE, new String[] {DEFAULT_DOMAIN_NAME, emptyAppFileBuilder.getId()}, true);
+    assertDomainDir(NONE, new String[] {DEFAULT_DOMAIN_NAME, emptyDomainFileBuilder.getId()}, true);
   }
 
   @Test
   public void redeployedDomainsAreDifferent() throws Exception {
     startDeployment();
 
-    addPackedDomainFromBuilder(emptyAppFileBuilder);
-    File dummyDomainFile = new File(domainsDir, emptyAppFileBuilder.getZipPath());
+    addPackedDomainFromBuilder(emptyDomainFileBuilder);
+    File dummyDomainFile = new File(domainsDir, emptyDomainFileBuilder.getZipPath());
     long firstFileTimestamp = dummyDomainFile.lastModified();
 
-    assertDeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
+    assertDeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
 
     assertEquals("Domain has not been properly registered with Mule", 2, deploymentService.getDomains().size());
-    Domain firstDomain = findADomain(emptyAppFileBuilder.getId());
+    Domain firstDomain = findADomain(emptyDomainFileBuilder.getId());
 
     reset(domainDeploymentListener);
 
-    addPackedDomainFromBuilder(emptyAppFileBuilder);
+    addPackedDomainFromBuilder(emptyDomainFileBuilder);
     alterTimestampIfNeeded(dummyDomainFile, firstFileTimestamp);
 
-    assertUndeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
-    assertDeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
+    assertUndeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
+    assertDeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
     assertEquals("Domain has not been properly registered with Mule", 2, deploymentService.getDomains().size());
-    Domain secondDomain = findADomain(emptyAppFileBuilder.getId());
+    Domain secondDomain = findADomain(emptyDomainFileBuilder.getId());
 
     assertNotSame(firstDomain, secondDomain);
   }
@@ -2479,6 +2479,27 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     assertDeploymentSuccess(domainDeploymentListener, dummyDomainFileBuilder.getId());
     assertEquals("Domain has not been properly registered with Mule", 2, deploymentService.getDomains().size());
     assertDomainDir(NONE, new String[] {DEFAULT_DOMAIN_NAME, dummyDomainFileBuilder.getId()}, true);
+  }
+
+  @Test
+  public void deploysDomainWithPlugin() throws Exception {
+    // TODO(pablo.kraan): domains - fix this test
+    ApplicationFileBuilder echoPluginAppFileBuilder =
+      new ApplicationFileBuilder("dummyWithEchoPlugin").definedBy("app-with-echo-plugin-config.xml").deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
+
+
+    DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
+      .dependingOn(echoPlugin)
+      .containing(echoPluginAppFileBuilder);
+
+    addPackedDomainFromBuilder(domainFileBuilder);
+
+    startDeployment();
+
+    assertDeploymentSuccess(domainDeploymentListener, domainFileBuilder.getId());
+    assertDeploymentSuccess(applicationDeploymentListener, echoPluginAppFileBuilder.getId());
+
+    executeApplicationFlow("main");
   }
 
   protected void alterTimestampIfNeeded(File file, long firstTimestamp) {
@@ -2578,7 +2599,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     addExplodedDomainFromBuilder(emptyDomainFileBuilder);
     assertDeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
 
-    addExplodedDomainFromBuilder(emptyAppFileBuilder, "empty2-domain");
+    addExplodedDomainFromBuilder(emptyDomainFileBuilder, "empty2-domain");
     assertDeploymentSuccess(domainDeploymentListener, "empty2-domain");
 
     // After three update cycles should have only one deployment failure notification for the broken app
@@ -2638,12 +2659,12 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
 
   @Test
   public void undeploysStoppedDomain() throws Exception {
-    addPackedDomainFromBuilder(emptyAppFileBuilder);
+    addPackedDomainFromBuilder(emptyDomainFileBuilder);
 
     startDeployment();
 
-    assertDeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
-    final Domain domain = findADomain(emptyAppFileBuilder.getId());
+    assertDeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
+    final Domain domain = findADomain(emptyDomainFileBuilder.getId());
     domain.stop();
 
     deploymentService.undeploy(domain);
@@ -2651,15 +2672,15 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
 
   @Test
   public void undeploysDomainRemovingAnchorFile() throws Exception {
-    addPackedDomainFromBuilder(emptyAppFileBuilder);
+    addPackedDomainFromBuilder(emptyDomainFileBuilder);
 
     startDeployment();
 
-    assertDeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
+    assertDeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
 
-    assertTrue("Unable to remove anchor file", removeDomainAnchorFile(emptyAppFileBuilder.getId()));
+    assertTrue("Unable to remove anchor file", removeDomainAnchorFile(emptyDomainFileBuilder.getId()));
 
-    assertUndeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
+    assertUndeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
   }
 
   @Test
@@ -2701,8 +2722,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     addPackedDomainFromBuilder(emptyDomainFileBuilder);
 
     TestDomainFactory testDomainFactory =
-        new TestDomainFactory(new DomainClassLoaderFactory(getClass().getClassLoader()),
-                              containerClassLoader, artifactClassLoaderManager, serviceManager);
+      TestDomainFactory.createDomainFactory(containerClassLoader, serviceManager, createDescriptorLoaderRepository());
     testDomainFactory.setMuleContextListenerFactory(new DeploymentMuleContextListenerFactory(domainDeploymentListener));
     testDomainFactory.setFailOnStopApplication();
 
@@ -2723,8 +2743,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     addPackedDomainFromBuilder(emptyDomainFileBuilder);
 
     TestDomainFactory testDomainFactory =
-        new TestDomainFactory(new DomainClassLoaderFactory(getClass().getClassLoader()),
-                              containerClassLoader, artifactClassLoaderManager, serviceManager);
+      TestDomainFactory.createDomainFactory(containerClassLoader, serviceManager, createDescriptorLoaderRepository());
     testDomainFactory.setMuleContextListenerFactory(new DeploymentMuleContextListenerFactory(domainDeploymentListener));
     testDomainFactory.setFailOnDisposeApplication();
     deploymentService.setDomainFactory(testDomainFactory);
@@ -2788,9 +2807,9 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     assertDeploymentFailure(domainDeploymentListener, incompleteDomainFileBuilder.getId());
 
     // Deploys another app to confirm that DeploymentService has execute the updater thread
-    addPackedDomainFromBuilder(emptyAppFileBuilder);
+    addPackedDomainFromBuilder(emptyDomainFileBuilder);
 
-    assertDeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
+    assertDeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
 
     // Check that the failed application folder is still there
     assertDomainFolderIsMaintained(incompleteDomainFileBuilder.getId());
@@ -2808,11 +2827,11 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     assertDeploymentFailure(domainDeploymentListener, incompleteDomainFileBuilder.getId());
 
     // Deploys another app to confirm that DeploymentService has execute the updater thread
-    addPackedDomainFromBuilder(emptyAppFileBuilder);
+    addPackedDomainFromBuilder(emptyDomainFileBuilder);
 
-    assertDeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
+    assertDeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
 
-    // Deploys another app to confirm that DeploymentService has execute the updater thread
+    // Deploys another domain to confirm that DeploymentService has execute the updater thread
     addPackedDomainFromBuilder(emptyDomainFileBuilder, incompleteDomainFileBuilder.getZipPath());
     assertDeploymentSuccess(domainDeploymentListener, incompleteDomainFileBuilder.getId());
 
@@ -2970,9 +2989,9 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     assertDeploymentFailure(domainDeploymentListener, incompleteDomainFileBuilder.getId());
 
     // Deploys another app to confirm that DeploymentService has execute the updater thread
-    addPackedDomainFromBuilder(emptyAppFileBuilder);
+    addPackedDomainFromBuilder(emptyDomainFileBuilder);
 
-    assertDeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
+    assertDeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
 
     // Redeploys a fixed version for incompleteDomain
     addExplodedDomainFromBuilder(emptyDomainFileBuilder, incompleteDomainFileBuilder.getId());
@@ -3537,8 +3556,8 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     copyFile(newConfigFile, originalConfigFile);
     assertDeploymentSuccess(domainDeploymentListener, "incompleteDomain");
 
-    addPackedDomainFromBuilder(emptyAppFileBuilder);
-    assertDeploymentSuccess(domainDeploymentListener, emptyAppFileBuilder.getId());
+    addPackedDomainFromBuilder(emptyDomainFileBuilder);
+    assertDeploymentSuccess(domainDeploymentListener, emptyDomainFileBuilder.getId());
 
     // Check that the failed application folder is still there
     assertDomainFolderIsMaintained("incompleteDomain");
@@ -3891,7 +3910,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     addPackedDomainFromBuilder(artifactFileBuilder, null);
   }
 
-  private void addPackedDomainFromBuilder(TestArtifactDescriptor artifactFileBuilder, String targetName) throws Exception {
+    private void addPackedDomainFromBuilder(TestArtifactDescriptor artifactFileBuilder, String targetName) throws Exception {
     addArchive(domainsDir, artifactFileBuilder.getArtifactFile().toURI(), targetName);
   }
 

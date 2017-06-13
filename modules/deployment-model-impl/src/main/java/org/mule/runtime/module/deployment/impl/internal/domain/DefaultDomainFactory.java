@@ -12,7 +12,6 @@ import static org.mule.runtime.api.util.Preconditions.checkArgument;
 import static org.mule.runtime.container.api.MuleFoldersUtil.getDomainFolder;
 import static org.mule.runtime.deployment.model.api.domain.Domain.DEFAULT_DOMAIN_NAME;
 import static org.mule.runtime.deployment.model.internal.domain.DomainClassLoaderFactory.getDomainId;
-import static org.mule.runtime.module.deployment.impl.internal.artifact.ArtifactFactoryUtils.getDeploymentFile;
 import static org.mule.runtime.module.reboot.api.MuleContainerBootstrapUtils.getMuleDomainsDir;
 import org.mule.runtime.deployment.model.api.domain.Domain;
 import org.mule.runtime.deployment.model.api.domain.DomainDescriptor;
@@ -29,25 +28,28 @@ public class DefaultDomainFactory implements DomainFactory {
 
   private final DeployableArtifactClassLoaderFactory<DomainDescriptor> domainClassLoaderFactory;
   private final DomainManager domainManager;
-  private final DomainDescriptorParser domainDescriptorParser;
+  private final DomainDescriptorFactory domainDescriptorFactory;
   private final ClassLoaderRepository classLoaderRepository;
   private final ServiceRepository serviceRepository;
 
   private final ArtifactClassLoader containerClassLoader;
   private MuleContextListenerFactory muleContextListenerFactory;
 
+  // TODO(pablo.kraan): domains - add javadoc
   public DefaultDomainFactory(DeployableArtifactClassLoaderFactory<DomainDescriptor> domainClassLoaderFactory,
+                              DomainDescriptorFactory domainDescriptorFactory,
                               DomainManager domainManager, ArtifactClassLoader containerClassLoader,
                               ClassLoaderRepository classLoaderRepository, ServiceRepository serviceRepository) {
-    this.classLoaderRepository = classLoaderRepository;
+    checkArgument(domainDescriptorFactory != null, "domainDescriptorFactory cannot be null");
     checkArgument(domainManager != null, "Domain manager cannot be null");
     checkArgument(containerClassLoader != null, "Container classLoader cannot be null");
     checkArgument(serviceRepository != null, "Service repository cannot be null");
 
+    this.classLoaderRepository = classLoaderRepository;
     this.containerClassLoader = containerClassLoader;
+    this.domainDescriptorFactory = domainDescriptorFactory;
     this.domainClassLoaderFactory = domainClassLoaderFactory;
     this.domainManager = domainManager;
-    this.domainDescriptorParser = new DomainDescriptorParser();
     this.serviceRepository = serviceRepository;
   }
 
@@ -86,15 +88,7 @@ public class DefaultDomainFactory implements DomainFactory {
     }
 
     File domainFolder = getDomainFolder(domainName);
-    final File deploymentFile = getDeploymentFile(domainFolder);
-
-    DomainDescriptor descriptor;
-
-    if (deploymentFile != null) {
-      descriptor = domainDescriptorParser.parse(domainFolder, deploymentFile, domainName);
-    } else {
-      descriptor = new EmptyDomainDescriptor(new File(getMuleDomainsDir(), domainName));
-    }
+    DomainDescriptor descriptor = domainDescriptorFactory.create(domainFolder);
 
     return descriptor;
   }

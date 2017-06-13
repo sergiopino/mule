@@ -4,25 +4,24 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package org.mule.runtime.module.deployment.impl.internal.application;
+package org.mule.runtime.module.deployment.impl.internal.domain;
 
 import static java.io.File.separator;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.mule.runtime.api.util.Preconditions.checkArgument;
 import static org.mule.runtime.core.config.bootstrap.ArtifactType.APP;
-import static org.mule.runtime.deployment.model.api.DeployableArtifactDescriptor.DEFAULT_ARTIFACT_PROPERTIES_RESOURCE;
-import static org.mule.runtime.deployment.model.api.application.ApplicationDescriptor.DEFAULT_CONFIGURATION_RESOURCE;
-import static org.mule.runtime.deployment.model.api.application.ApplicationDescriptor.DEFAULT_CONFIGURATION_RESOURCE_LOCATION;
-import static org.mule.runtime.deployment.model.api.application.ApplicationDescriptor.MULE_APPLICATION_JSON;
+import static org.mule.runtime.core.config.bootstrap.ArtifactType.DOMAIN;
+import static org.mule.runtime.deployment.model.api.domain.DomainDescriptor.DEFAULT_CONFIGURATION_RESOURCE;
+import static org.mule.runtime.deployment.model.api.domain.DomainDescriptor.DEFAULT_CONFIGURATION_RESOURCE_LOCATION;
 import static org.mule.runtime.deployment.model.api.plugin.ArtifactPluginDescriptor.MULE_ARTIFACT_FOLDER;
-import org.mule.runtime.api.deployment.meta.MuleApplicationModel;
 import org.mule.runtime.api.deployment.meta.MuleArtifactLoaderDescriptor;
-import org.mule.runtime.api.deployment.persistence.MuleApplicationModelJsonSerializer;
+import org.mule.runtime.api.deployment.meta.MuleDomainModel;
+import org.mule.runtime.api.deployment.persistence.MuleDomainModelJsonSerializer;
 import org.mule.runtime.api.meta.MuleVersion;
 import org.mule.runtime.container.api.MuleFoldersUtil;
-import org.mule.runtime.core.api.util.PropertiesUtils;
 import org.mule.runtime.deployment.model.api.application.ApplicationDescriptor;
+import org.mule.runtime.deployment.model.api.domain.DomainDescriptor;
 import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginDescriptor;
 import org.mule.runtime.module.artifact.descriptor.ArtifactDescriptorCreateException;
 import org.mule.runtime.module.artifact.descriptor.ArtifactDescriptorFactory;
@@ -42,11 +41,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -54,16 +50,16 @@ import org.apache.commons.io.IOUtils;
 /**
  * Creates artifact descriptor for application
  */
-public class ApplicationDescriptorFactory implements ArtifactDescriptorFactory<ApplicationDescriptor> {
-
-  public static final String SYSTEM_PROPERTY_OVERRIDE = "-O";
+// TODO(pablo.kraan): domains - add unit tests
+public class DomainDescriptorFactory implements ArtifactDescriptorFactory<DomainDescriptor> {
 
   private static final String MULE_CONFIG_FILES_FOLDER = "mule";
+  private static final String MULE_DOMAIN_JSON = "mule-domain.json";
 
   private final ArtifactPluginDescriptorLoader artifactPluginDescriptorLoader;
   private final DescriptorLoaderRepository descriptorLoaderRepository;
 
-  public ApplicationDescriptorFactory(ArtifactPluginDescriptorLoader artifactPluginDescriptorLoader,
+  public DomainDescriptorFactory(ArtifactPluginDescriptorLoader artifactPluginDescriptorLoader,
                                       DescriptorLoaderRepository descriptorLoaderRepository) {
     checkArgument(artifactPluginDescriptorLoader != null, "ApplicationPluginDescriptorFactory cannot be null");
 
@@ -72,15 +68,16 @@ public class ApplicationDescriptorFactory implements ArtifactDescriptorFactory<A
   }
 
   @Override
-  public ApplicationDescriptor create(File artifactFolder) throws ArtifactDescriptorCreateException {
-    ApplicationDescriptor applicationDescriptor;
-    final File mulePluginJsonFile = new File(artifactFolder, MULE_ARTIFACT_FOLDER + separator + MULE_APPLICATION_JSON);
+  public DomainDescriptor create(File artifactFolder) throws ArtifactDescriptorCreateException {
+    DomainDescriptor domainDescriptor;
+    // TODO(pablo.kraan): domain - change constnat
+    final File mulePluginJsonFile = new File(artifactFolder, MULE_ARTIFACT_FOLDER + separator + MULE_DOMAIN_JSON);
     if (!mulePluginJsonFile.exists()) {
       throw new IllegalStateException("Artifact descriptor does not exists: " + mulePluginJsonFile);
     }
-    applicationDescriptor = loadFromJsonDescriptor(artifactFolder, mulePluginJsonFile);
+    domainDescriptor = loadFromJsonDescriptor(artifactFolder, mulePluginJsonFile);
 
-    return applicationDescriptor;
+    return domainDescriptor;
   }
 
   protected static String invalidClassLoaderModelIdError(File pluginFolder,
@@ -90,19 +87,20 @@ public class ApplicationDescriptorFactory implements ArtifactDescriptorFactory<A
                   pluginFolder.getAbsolutePath());
   }
 
-  private BundleDescriptor getBundleDescriptor(File appFolder, MuleApplicationModel muleApplicationModel) {
+  // TODO(pablo.kraan): domains - try to remove duplication from this class and app's
+  private BundleDescriptor getBundleDescriptor(File appFolder, MuleDomainModel muleDomainModel) {
     BundleDescriptorLoader bundleDescriptorLoader;
     try {
       bundleDescriptorLoader =
-          descriptorLoaderRepository.get(muleApplicationModel.getBundleDescriptorLoader().getId(), APP,
-                                         BundleDescriptorLoader.class);
+        descriptorLoaderRepository.get(muleDomainModel.getBundleDescriptorLoader().getId(), APP,
+                                       BundleDescriptorLoader.class);
     } catch (LoaderNotFoundException e) {
-      throw new ArtifactDescriptorCreateException(invalidBundleDescriptorLoaderIdError(appFolder, muleApplicationModel
-          .getBundleDescriptorLoader()));
+      throw new ArtifactDescriptorCreateException(invalidBundleDescriptorLoaderIdError(appFolder, muleDomainModel
+        .getBundleDescriptorLoader()));
     }
 
     try {
-      return bundleDescriptorLoader.load(appFolder, muleApplicationModel.getBundleDescriptorLoader().getAttributes(), APP);
+      return bundleDescriptorLoader.load(appFolder, muleDomainModel.getBundleDescriptorLoader().getAttributes(), APP);
     } catch (InvalidDescriptorLoaderException e) {
       throw new ArtifactDescriptorCreateException(e);
     }
@@ -115,38 +113,35 @@ public class ApplicationDescriptorFactory implements ArtifactDescriptorFactory<A
                   pluginFolder.getAbsolutePath());
   }
 
-  private ApplicationDescriptor loadFromJsonDescriptor(File applicationFolder, File muleApplicationJsonFile) {
-    final MuleApplicationModel muleApplicationModel = getMuleApplicationJsonDescriber(muleApplicationJsonFile);
+  private DomainDescriptor loadFromJsonDescriptor(File domainFolder, File muleApplicationJsonFile) {
+    final MuleDomainModel muleDomainModel = getMuleDomainJsonDescriber(muleApplicationJsonFile);
 
-    final ApplicationDescriptor descriptor = new ApplicationDescriptor(applicationFolder.getName());
-    descriptor.setArtifactLocation(applicationFolder);
-    descriptor.setRootFolder(applicationFolder);
-    descriptor.setBundleDescriptor(getBundleDescriptor(applicationFolder, muleApplicationModel));
-    descriptor.setMinMuleVersion(new MuleVersion(muleApplicationModel.getMinMuleVersion()));
-    // TODO(pablo.kraan): domains - check if encoding is something that is still configured in the app
-    descriptor.setRedeploymentEnabled(muleApplicationModel.isRedeploymentEnabled());
-    muleApplicationModel.getDomain().ifPresent(domain -> {
-      descriptor.setDomain(domain);
-    });
-    List<String> muleApplicationModelConfigs = muleApplicationModel.getConfigs();
-    if (muleApplicationModelConfigs != null && !muleApplicationModelConfigs.isEmpty()) {
-      descriptor.setConfigResources(muleApplicationModelConfigs.stream().map(configFile -> appendMuleFolder(configFile))
-          .collect(toList()));
+    final DomainDescriptor descriptor = new DomainDescriptor(domainFolder.getName());
+    descriptor.setArtifactLocation(domainFolder);
+    descriptor.setRootFolder(domainFolder);
+    descriptor.setBundleDescriptor(getBundleDescriptor(domainFolder, muleDomainModel));
+    descriptor.setMinMuleVersion(new MuleVersion(muleDomainModel.getMinMuleVersion()));
+    descriptor.setRedeploymentEnabled(muleDomainModel.isRedeploymentEnabled());
+
+    List<String> configs = muleDomainModel.getConfigs();
+    if (configs != null && !configs.isEmpty()) {
+      descriptor.setConfigResources(configs.stream().map(configFile -> appendMuleFolder(configFile))
+                                      .collect(toList()));
       List<File> configFiles = descriptor.getConfigResources()
-          .stream()
-          .map(config -> new File(applicationFolder, config)).collect(toList());
+        .stream()
+        .map(config -> new File(domainFolder, config)).collect(toList());
       descriptor.setConfigResourcesFile(configFiles.toArray(new File[configFiles.size()]));
       descriptor.setAbsoluteResourcePaths(configFiles.stream().map(configFile -> configFile.getAbsolutePath()).collect(toList())
-          .toArray(new String[configFiles.size()]));
+                                            .toArray(new String[configFiles.size()]));
     } else {
-      File configFile = new File(applicationFolder, appendMuleFolder(DEFAULT_CONFIGURATION_RESOURCE));
+      File configFile = new File(domainFolder, appendMuleFolder(DEFAULT_CONFIGURATION_RESOURCE));
       descriptor.setConfigResourcesFile(new File[] {configFile});
       descriptor.setConfigResources(ImmutableList.<String>builder().add(DEFAULT_CONFIGURATION_RESOURCE_LOCATION).build());
       descriptor.setAbsoluteResourcePaths(new String[] {configFile.getAbsolutePath()});
     }
 
-    muleApplicationModel.getClassLoaderModelLoaderDescriptor().ifPresent(classLoaderModelLoaderDescriptor -> {
-      ClassLoaderModel classLoaderModel = getClassLoaderModel(applicationFolder, classLoaderModelLoaderDescriptor);
+    muleDomainModel.getClassLoaderModelLoaderDescriptor().ifPresent(classLoaderModelLoaderDescriptor -> {
+      ClassLoaderModel classLoaderModel = getClassLoaderModel(domainFolder, classLoaderModelLoaderDescriptor);
       descriptor.setClassLoaderModel(classLoaderModel);
 
       try {
@@ -155,9 +150,10 @@ public class ApplicationDescriptorFactory implements ArtifactDescriptorFactory<A
         throw new IllegalStateException(e);
       }
     });
-    File appClassesFolder = getAppClassesFolder(descriptor);
+    // TODO(pablo.kraan): domains - do domain support configuration properties?
+    //File domainClassesFolder = getDomainClassFolder(descriptor);
     // get a ref to an optional app props file (right next to the descriptor)
-    setApplicationProperties(descriptor, new File(appClassesFolder, DEFAULT_ARTIFACT_PROPERTIES_RESOURCE));
+    //setDomainProperties(descriptor, new File(domainClassesFolder, DEFAULT_ARTIFACT_PROPERTIES_RESOURCE));
     return descriptor;
   }
 
@@ -165,29 +161,29 @@ public class ApplicationDescriptorFactory implements ArtifactDescriptorFactory<A
     return MULE_CONFIG_FILES_FOLDER + File.separator + configFile;
   }
 
-  private MuleApplicationModel getMuleApplicationJsonDescriber(File jsonFile) {
+  private MuleDomainModel getMuleDomainJsonDescriber(File jsonFile) {
     try (InputStream stream = new FileInputStream(jsonFile)) {
-      return new MuleApplicationModelJsonSerializer().deserialize(IOUtils.toString(stream));
+      return new MuleDomainModelJsonSerializer().deserialize(IOUtils.toString(stream));
     } catch (IOException e) {
       throw new IllegalArgumentException(format("Could not read extension describer on plugin '%s'", jsonFile.getAbsolutePath()),
                                          e);
     }
   }
 
-  private ClassLoaderModel getClassLoaderModel(File applicationFolder,
+  private ClassLoaderModel getClassLoaderModel(File domainFolder,
                                                MuleArtifactLoaderDescriptor classLoaderModelLoaderDescriptor) {
     ClassLoaderModelLoader classLoaderModelLoader;
     try {
       classLoaderModelLoader =
-          descriptorLoaderRepository.get(classLoaderModelLoaderDescriptor.getId(), APP, ClassLoaderModelLoader.class);
+        descriptorLoaderRepository.get(classLoaderModelLoaderDescriptor.getId(), APP, ClassLoaderModelLoader.class);
     } catch (LoaderNotFoundException e) {
-      throw new ArtifactDescriptorCreateException(invalidClassLoaderModelIdError(applicationFolder,
+      throw new ArtifactDescriptorCreateException(invalidClassLoaderModelIdError(domainFolder,
                                                                                  classLoaderModelLoaderDescriptor));
     }
 
     final ClassLoaderModel classLoaderModel;
     try {
-      classLoaderModel = classLoaderModelLoader.load(applicationFolder, classLoaderModelLoaderDescriptor.getAttributes(), APP);
+      classLoaderModel = classLoaderModelLoader.load(domainFolder, classLoaderModelLoaderDescriptor.getAttributes(), DOMAIN);
     } catch (InvalidDescriptorLoaderException e) {
       throw new ArtifactDescriptorCreateException(e);
     }
@@ -195,7 +191,7 @@ public class ApplicationDescriptorFactory implements ArtifactDescriptorFactory<A
   }
 
   private Set<ArtifactPluginDescriptor> createArtifactPluginDescriptors(ClassLoaderModel classLoaderModel)
-      throws IOException {
+    throws IOException {
     Set<ArtifactPluginDescriptor> pluginDescriptors = new HashSet<>();
     for (BundleDependency bundleDependency : classLoaderModel.getDependencies()) {
       if (bundleDependency.getDescriptor().isPlugin()) {
@@ -214,34 +210,9 @@ public class ApplicationDescriptorFactory implements ArtifactDescriptorFactory<A
     return MuleFoldersUtil.getAppSharedLibsFolder(descriptor.getName());
   }
 
-  protected File getAppClassesFolder(ApplicationDescriptor descriptor) {
+  protected File getDomainClassFolder(DomainDescriptor descriptor) {
     return MuleFoldersUtil.getAppClassesFolder(descriptor.getName());
   }
 
-  public void setApplicationProperties(ApplicationDescriptor desc, File appPropsFile) {
-    // ugh, no straightforward way to convert a HashTable to a map
-    Map<String, String> m = new HashMap<>();
 
-    if (appPropsFile.exists() && appPropsFile.canRead()) {
-      final Properties props;
-      try {
-        props = PropertiesUtils.loadProperties(appPropsFile.toURI().toURL());
-      } catch (IOException e) {
-        throw new IllegalArgumentException("Unable to obtain application properties file URL", e);
-      }
-      for (Object key : props.keySet()) {
-        m.put(key.toString(), props.getProperty(key.toString()));
-      }
-    }
-
-    // Override with any system properties prepended with "-O" for ("override"))
-    Properties sysProps = System.getProperties();
-    for (Map.Entry<Object, Object> entry : sysProps.entrySet()) {
-      String key = entry.getKey().toString();
-      if (key.startsWith(SYSTEM_PROPERTY_OVERRIDE)) {
-        m.put(key.substring(SYSTEM_PROPERTY_OVERRIDE.length()), entry.getValue().toString());
-      }
-    }
-    desc.setAppProperties(m);
-  }
 }

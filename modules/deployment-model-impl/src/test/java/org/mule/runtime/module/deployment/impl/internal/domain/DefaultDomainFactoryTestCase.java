@@ -35,11 +35,11 @@ public class DefaultDomainFactoryTestCase extends AbstractDomainTestCase {
   private final ArtifactClassLoaderManager artifactClassLoaderManager = mock(ArtifactClassLoaderManager.class);
   private final ServiceRepository serviceRepository = mock(ServiceRepository.class);
   private final DefaultDomainFactory domainFactory = new DefaultDomainFactory(
-                                                                              new DomainClassLoaderFactory(getClass()
+    new DomainClassLoaderFactory(getClass()
                                                                                   .getClassLoader()),
-                                                                              new DefaultDomainManager(), containerClassLoader,
-                                                                              null,
-                                                                              serviceRepository);
+    null, new DefaultDomainManager(), containerClassLoader,
+    null,
+    serviceRepository);
 
   public DefaultDomainFactoryTestCase() throws IOException {}
 
