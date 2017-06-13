@@ -138,7 +138,6 @@ public class DomainFileBuilder extends DeployableFileBuilder<DomainFileBuilder> 
     Object redeploymentEnabled = deployProperties.get(PROPERTY_REDEPLOYMENT_ENABLED);
     Object configResources = deployProperties.get(PROPERTY_CONFIG_RESOURCES);
 
-    // TODO(pablo.kraan): domains - domain should expose only some libs to the apps (ie: some components could be hidden in the domain)
     File applicationDescriptor = createApplicationJsonDescriptorFile(
                                                                      redeploymentEnabled == null
                                                                          ? empty()

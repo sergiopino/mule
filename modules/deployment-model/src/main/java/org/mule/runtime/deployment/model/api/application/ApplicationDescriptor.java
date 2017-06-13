@@ -13,17 +13,14 @@ import static org.mule.runtime.container.api.MuleFoldersUtil.getAppConfigFolderP
 import static org.mule.runtime.deployment.model.api.domain.Domain.DEFAULT_DOMAIN_NAME;
 import org.mule.runtime.api.app.declaration.ArtifactDeclaration;
 import org.mule.runtime.deployment.model.api.DeployableArtifactDescriptor;
-import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginDescriptor;
 
 import com.google.common.collect.ImmutableList;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 
 public class ApplicationDescriptor extends DeployableArtifactDescriptor {
@@ -37,13 +34,8 @@ public class ApplicationDescriptor extends DeployableArtifactDescriptor {
 
   private String encoding;
   private String domain = DEFAULT_DOMAIN_NAME;
-  private List<String> configResources =
-      ImmutableList.<String>builder().add(getAppConfigFolderPath() + DEFAULT_CONFIGURATION_RESOURCE).build();
-  private String[] absoluteResourcePaths;
-  private File[] configResourcesFile;
   private Map<String, String> appProperties = new HashMap<String, String>();
   private File logConfigFile;
-  private Set<ArtifactPluginDescriptor> plugins = new HashSet<>(0);
   private ArtifactDeclaration artifactDeclaration;
 
   /**
@@ -80,50 +72,12 @@ public class ApplicationDescriptor extends DeployableArtifactDescriptor {
     this.domain = domain;
   }
 
-  public List<String> getConfigResources() {
-    return configResources;
-  }
-
-  public void setConfigResources(List<String> configResources) {
-    this.configResources = configResources;
-  }
-
-  public String[] getAbsoluteResourcePaths() {
-    return absoluteResourcePaths;
-  }
-
-  public void setAbsoluteResourcePaths(String[] absoluteResourcePaths) {
-    this.absoluteResourcePaths = absoluteResourcePaths;
-  }
-
-  public void setConfigResourcesFile(File[] configResourcesFile) {
-    this.configResourcesFile = configResourcesFile;
-  }
-
-  public File[] getConfigResourcesFile() {
-    return configResourcesFile;
-  }
-
   public void setLogConfigFile(File logConfigFile) {
     this.logConfigFile = logConfigFile;
   }
 
   public File getLogConfigFile() {
     return logConfigFile;
-  }
-
-  /**
-   * @return the {@code ApplicationPluginDescriptor} that describe the plugins the application requires.
-   */
-  public Set<ArtifactPluginDescriptor> getPlugins() {
-    return plugins;
-  }
-
-  /**
-   * @param plugins a set of {@code ApplicationPluginDescriptor} which are dependencies of the application.
-   */
-  public void setPlugins(Set<ArtifactPluginDescriptor> plugins) {
-    this.plugins = plugins;
   }
 
   /**
@@ -138,5 +92,9 @@ public class ApplicationDescriptor extends DeployableArtifactDescriptor {
    */
   public void setArtifactDeclaration(ArtifactDeclaration artifactDeclaration) {
     this.artifactDeclaration = artifactDeclaration;
+  }
+
+  @Override protected List<String> getDefaultConfigResources() {
+    return ImmutableList.<String>builder().add(getAppConfigFolderPath() + DEFAULT_CONFIGURATION_RESOURCE).build();
   }
 }

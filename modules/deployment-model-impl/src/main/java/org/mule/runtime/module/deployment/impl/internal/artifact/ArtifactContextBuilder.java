@@ -338,7 +338,6 @@ public class ArtifactContextBuilder {
         List<ConfigurationBuilder> builders = new LinkedList<>();
         builders.addAll(additionalBuilders);
         builders.add(new ArtifactBootstrapServiceDiscovererConfigurationBuilder(artifactPlugins));
-        // TODO(pablo.kraan): domains - need to create a composite extension manager for the app
         if (extensionManagerFactory == null) {
           if (parentContext == null) {
             extensionManagerFactory =

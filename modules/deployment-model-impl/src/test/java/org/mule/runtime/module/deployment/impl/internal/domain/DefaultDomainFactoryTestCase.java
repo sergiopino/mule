@@ -17,7 +17,6 @@ import static org.mule.runtime.module.reboot.api.MuleContainerBootstrapUtils.MUL
 import org.mule.runtime.core.api.context.notification.MuleContextListener;
 import org.mule.runtime.deployment.model.api.domain.Domain;
 import org.mule.runtime.deployment.model.internal.domain.AbstractDomainTestCase;
-import org.mule.runtime.deployment.model.internal.domain.DomainClassLoaderFactory;
 import org.mule.runtime.module.artifact.classloader.ArtifactClassLoaderManager;
 import org.mule.runtime.module.service.ServiceRepository;
 
@@ -35,11 +34,8 @@ public class DefaultDomainFactoryTestCase extends AbstractDomainTestCase {
   private final ArtifactClassLoaderManager artifactClassLoaderManager = mock(ArtifactClassLoaderManager.class);
   private final ServiceRepository serviceRepository = mock(ServiceRepository.class);
   private final DefaultDomainFactory domainFactory = new DefaultDomainFactory(
-                                                                              new DomainClassLoaderFactory(getClass()
-                                                                                  .getClassLoader()),
-                                                                              null, new DefaultDomainManager(),
-                                                                              containerClassLoader,
-                                                                              null,
+    null, new DefaultDomainManager(),
+    null,
                                                                               serviceRepository, null, null, null, null);
 
   public DefaultDomainFactoryTestCase() throws IOException {}

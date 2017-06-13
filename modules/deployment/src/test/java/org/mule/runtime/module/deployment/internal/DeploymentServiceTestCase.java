@@ -2507,6 +2507,8 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     executeApplicationFlow("main");
   }
 
+  // TODO(pablo.kraan): domains - add test - plugin in domain + same plugin in app
+
   protected void alterTimestampIfNeeded(File file, long firstTimestamp) {
     if (!file.exists()) {
       throw new IllegalArgumentException("File does not exists: " + file.getAbsolutePath());

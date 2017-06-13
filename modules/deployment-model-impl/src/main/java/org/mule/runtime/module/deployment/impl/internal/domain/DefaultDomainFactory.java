@@ -22,9 +22,7 @@ import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginDescriptor;
 import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginRepository;
 import org.mule.runtime.deployment.model.internal.domain.DomainClassLoaderBuilder;
 import org.mule.runtime.deployment.model.internal.plugin.PluginDependenciesResolver;
-import org.mule.runtime.module.artifact.classloader.ArtifactClassLoader;
 import org.mule.runtime.module.artifact.classloader.ClassLoaderRepository;
-import org.mule.runtime.module.artifact.classloader.DeployableArtifactClassLoaderFactory;
 import org.mule.runtime.module.artifact.classloader.MuleDeployableArtifactClassLoader;
 import org.mule.runtime.module.artifact.descriptor.BundleDependency;
 import org.mule.runtime.module.deployment.impl.internal.artifact.ArtifactFactory;
@@ -42,7 +40,6 @@ import java.util.stream.Collectors;
 
 public class DefaultDomainFactory implements ArtifactFactory<Domain> {
 
-  private final DeployableArtifactClassLoaderFactory<DomainDescriptor> domainClassLoaderFactory;
   private final DomainManager domainManager;
   private final DomainDescriptorFactory domainDescriptorFactory;
   private final ClassLoaderRepository classLoaderRepository;
@@ -52,13 +49,11 @@ public class DefaultDomainFactory implements ArtifactFactory<Domain> {
   private final PluginDependenciesResolver pluginDependenciesResolver;
   private final DomainClassLoaderBuilderFactory domainClassLoaderBuilderFactory;
 
-  private final ArtifactClassLoader containerClassLoader;
   private MuleContextListenerFactory muleContextListenerFactory;
 
   // TODO(pablo.kraan): domains - add javadoc
-  public DefaultDomainFactory(DeployableArtifactClassLoaderFactory<DomainDescriptor> domainClassLoaderFactory,
-                              DomainDescriptorFactory domainDescriptorFactory,
-                              DomainManager domainManager, ArtifactClassLoader containerClassLoader,
+  public DefaultDomainFactory(DomainDescriptorFactory domainDescriptorFactory,
+                              DomainManager domainManager,
                               ClassLoaderRepository classLoaderRepository, ServiceRepository serviceRepository,
                               ArtifactPluginDescriptorLoader pluginDescriptorLoader,
                               ArtifactPluginRepository artifactPluginRepository,
@@ -66,7 +61,6 @@ public class DefaultDomainFactory implements ArtifactFactory<Domain> {
                               DomainClassLoaderBuilderFactory domainClassLoaderBuilderFactory) {
     checkArgument(domainDescriptorFactory != null, "domainDescriptorFactory cannot be null");
     checkArgument(domainManager != null, "Domain manager cannot be null");
-    checkArgument(containerClassLoader != null, "Container classLoader cannot be null");
     checkArgument(serviceRepository != null, "Service repository cannot be null");
     checkArgument(pluginDescriptorLoader != null, "pluginDescriptorLoader cannot be null");
     checkArgument(artifactPluginRepository != null, "Artifact plugin repository cannot be null");
@@ -74,9 +68,7 @@ public class DefaultDomainFactory implements ArtifactFactory<Domain> {
     checkArgument(domainClassLoaderBuilderFactory != null, "domainClassLoaderBuilderFactory cannot be null");
 
     this.classLoaderRepository = classLoaderRepository;
-    this.containerClassLoader = containerClassLoader;
     this.domainDescriptorFactory = domainDescriptorFactory;
-    this.domainClassLoaderFactory = domainClassLoaderFactory;
     this.domainManager = domainManager;
     this.serviceRepository = serviceRepository;
     this.pluginDescriptorLoader = pluginDescriptorLoader;

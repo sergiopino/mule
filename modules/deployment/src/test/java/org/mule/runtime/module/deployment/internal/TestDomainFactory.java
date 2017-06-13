@@ -71,7 +71,7 @@ public class TestDomainFactory extends DefaultDomainFactory {
                             ArtifactPluginRepository artifactPluginRepository,
                             PluginDependenciesResolver pluginDependenciesResolver,
                             DomainClassLoaderBuilderFactory domainClassLoaderBuilderFactory) {
-    super(domainClassLoaderFactory, domainDescriptorFactory, new DefaultDomainManager(), containerClassLoader,
+    super(domainDescriptorFactory, new DefaultDomainManager(),
           classLoaderRepository, serviceRepository,
           pluginDescriptorLoader, artifactPluginRepository, pluginDependenciesResolver, domainClassLoaderBuilderFactory);
   }

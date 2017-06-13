@@ -70,7 +70,6 @@ public class DomainDescriptorFactory implements ArtifactDescriptorFactory<Domain
   @Override
   public DomainDescriptor create(File artifactFolder) throws ArtifactDescriptorCreateException {
     DomainDescriptor domainDescriptor;
-    // TODO(pablo.kraan): domain - change constnat
     final File mulePluginJsonFile = new File(artifactFolder, MULE_ARTIFACT_FOLDER + separator + MULE_DOMAIN_JSON);
     if (!mulePluginJsonFile.exists()) {
       throw new IllegalStateException("Artifact descriptor does not exists: " + mulePluginJsonFile);

@@ -75,8 +75,6 @@ public class MuleArtifactResourcesRegistry {
   private final ExtensionModelLoaderManager extensionModelLoaderManager;
   private final ArtifactClassLoaderFactory<ArtifactPluginDescriptor> artifactPluginClassLoaderFactory;
   private final DefaultClassLoaderManager artifactClassLoaderManager;
-  // TODO(pablo.kraan): domains - check if this field is needed
-  private final ModuleRepository moduleRepository;
   private final ApplicationClassLoaderBuilderFactory applicationClassLoaderBuilderFactory;
   private final DomainClassLoaderBuilderFactory domainClassLoaderBuilderFactory;
   private final DomainDescriptorFactory domainDescriptorFactory;
@@ -122,10 +120,8 @@ public class MuleArtifactResourcesRegistry {
    * Creates a repository for resources required for mule artifacts.
    */
   private MuleArtifactResourcesRegistry(ModuleRepository moduleRepository) {
-    this.moduleRepository = moduleRepository;
-
     containerClassLoader =
-        new ContainerClassLoaderFactory(moduleRepository).createContainerClassLoader(getClass().getClassLoader());
+      new ContainerClassLoaderFactory(moduleRepository).createContainerClassLoader(getClass().getClassLoader());
     artifactClassLoaderManager = new DefaultClassLoaderManager();
 
     domainManager = new DefaultDomainManager();
@@ -158,7 +154,7 @@ public class MuleArtifactResourcesRegistry {
                                                             new ReflectionServiceResolver(new ReflectionServiceProviderResolutionHelper())));
     extensionModelLoaderManager = new MuleExtensionModelLoaderManager(containerClassLoader);
     domainFactory =
-        new DefaultDomainFactory(this.domainClassLoaderFactory, domainDescriptorFactory, domainManager, containerClassLoader,
+        new DefaultDomainFactory(domainDescriptorFactory, domainManager,
                                  artifactClassLoaderManager, serviceManager, artifactPluginDescriptorLoader,
                                  artifactPluginRepository, pluginDependenciesResolver, domainClassLoaderBuilderFactory);
 
