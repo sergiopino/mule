@@ -31,6 +31,7 @@ public class ApplicationDescriptor extends DeployableArtifactDescriptor {
   public static final String MULE_APPLICATION_JSON = "mule-application.json";
   public static final String MULE_APPLICATION_JSON_LOCATION =
       Paths.get("META-INF", "mule-artifact", "mule-application.json").toString();
+  public static final String PROPERTY_DOMAIN = "domain";
 
   private String encoding;
   private String domain = DEFAULT_DOMAIN_NAME;

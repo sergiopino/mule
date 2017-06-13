@@ -12,17 +12,15 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.io.FilenameUtils.getName;
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.mule.runtime.container.api.MuleFoldersUtil.getAppSharedLibsFolderPath;
+import static org.mule.runtime.deployment.model.api.DeployableArtifactDescriptor.PROPERTY_CONFIG_RESOURCES;
+import static org.mule.runtime.deployment.model.api.DeployableArtifactDescriptor.PROPERTY_REDEPLOYMENT_ENABLED;
 import static org.mule.runtime.deployment.model.api.application.ApplicationDescriptor.DEFAULT_ARTIFACT_PROPERTIES_RESOURCE;
 import static org.mule.runtime.deployment.model.api.application.ApplicationDescriptor.DEFAULT_CONFIGURATION_RESOURCE;
 import static org.mule.runtime.deployment.model.api.application.ApplicationDescriptor.MULE_APPLICATION_JSON_LOCATION;
+import static org.mule.runtime.deployment.model.api.application.ApplicationDescriptor.PROPERTY_DOMAIN;
 import static org.mule.runtime.deployment.model.api.plugin.MavenClassLoaderConstants.EXPORTED_RESOURCES;
 import static org.mule.runtime.deployment.model.api.plugin.MavenClassLoaderConstants.MAVEN;
-import static org.mule.runtime.module.deployment.impl.internal.application.PropertiesDescriptorParser.PROPERTY_CONFIG_RESOURCES;
-import static org.mule.runtime.module.deployment.impl.internal.application.PropertiesDescriptorParser.PROPERTY_DOMAIN;
-import static org.mule.runtime.module.deployment.impl.internal.application.PropertiesDescriptorParser.PROPERTY_REDEPLOYMENT_ENABLED;
 import org.mule.runtime.api.deployment.meta.MuleApplicationModel;
 import org.mule.runtime.api.deployment.meta.MuleArtifactLoaderDescriptor;
 import org.mule.runtime.api.deployment.persistence.MuleApplicationModelJsonSerializer;
@@ -151,20 +149,6 @@ public class ApplicationFileBuilder extends DeployableFileBuilder<ApplicationFil
     return getThis();
   }
 
-  /**
-   * Adds a jar file to the application plugin lib folder.
-   *
-   * @param jarFile jar file from a external file or test resource.
-   * @return the same builder instance
-   */
-  public ApplicationFileBuilder sharingLibrary(String jarFile) {
-    checkImmutable();
-    checkArgument(!StringUtils.isEmpty(jarFile), "Jar file cannot be empty");
-    resources.add(new ZipResource(jarFile, getAppSharedLibsFolderPath() + getName(jarFile)));
-
-    return this;
-  }
-
   @Override
   public String getConfigFile() {
     return DEFAULT_CONFIGURATION_RESOURCE;
@@ -182,6 +166,7 @@ public class ApplicationFileBuilder extends DeployableFileBuilder<ApplicationFil
       customResources.add(appProperties);
     }
 
+    // TODO(pablo.kraan): domains - there is no test covering these two lines, deploy properties are always empty
     Object redeploymentEnabled = deployProperties.get(PROPERTY_REDEPLOYMENT_ENABLED);
     Object configResources = deployProperties.get(PROPERTY_CONFIG_RESOURCES);
     File applicationDescriptor = createApplicationJsonDescriptorFile(

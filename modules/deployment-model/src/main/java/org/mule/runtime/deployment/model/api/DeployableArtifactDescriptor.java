@@ -22,6 +22,8 @@ public class DeployableArtifactDescriptor extends ArtifactDescriptor {
 
   public static final String DEFAULT_DEPLOY_PROPERTIES_RESOURCE = "mule-deploy.properties";
   public static final String DEFAULT_ARTIFACT_PROPERTIES_RESOURCE = "mule-artifact.properties";
+  public static final String PROPERTY_REDEPLOYMENT_ENABLED = "redeployment.enabled";
+  public static final String PROPERTY_CONFIG_RESOURCES = "config.resources";
 
   private boolean redeploymentEnabled = true;
   private File location;
