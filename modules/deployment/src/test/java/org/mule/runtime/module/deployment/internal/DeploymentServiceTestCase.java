@@ -2489,7 +2489,6 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     ApplicationFileBuilder echoPluginAppFileBuilder =
       new ApplicationFileBuilder("dummyWithEchoPlugin").definedBy("app-with-echo-plugin-config.xml").deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
 
-
     DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
       .dependingOn(echoPlugin)
       .containing(echoPluginAppFileBuilder);

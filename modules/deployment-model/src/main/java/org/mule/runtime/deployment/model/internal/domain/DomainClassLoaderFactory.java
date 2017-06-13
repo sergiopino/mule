@@ -22,8 +22,6 @@ import org.mule.runtime.module.artifact.classloader.ArtifactClassLoader;
 import org.mule.runtime.module.artifact.classloader.ClassLoaderLookupPolicy;
 import org.mule.runtime.module.artifact.classloader.DeployableArtifactClassLoaderFactory;
 import org.mule.runtime.module.artifact.classloader.LookupStrategy;
-import org.mule.runtime.module.artifact.util.FileJarExplorer;
-import org.mule.runtime.module.artifact.util.JarExplorer;
 
 import java.io.File;
 import java.util.Arrays;
@@ -41,22 +39,16 @@ public class DomainClassLoaderFactory implements DeployableArtifactClassLoaderFa
 
   protected static final Logger logger = LoggerFactory.getLogger(DomainClassLoaderFactory.class);
 
-  private final ClassLoader parentClassLoader;
+  private final ClassLoader containerClassLoader;
   private Map<String, ArtifactClassLoader> domainArtifactClassLoaders = new HashMap<>();
-  private JarExplorer jarExplorer = new FileJarExplorer();
-
   /**
    * Creates a new instance
    *
-   * @param parentClassLoader parent classLoader of the created instance. Can be null.
+   * @param containerClassLoader parent classLoader of the created instance. Can be null.
    */
-  public DomainClassLoaderFactory(ClassLoader parentClassLoader) {
-    checkArgument(parentClassLoader != null, "parentClassLoader cannot be null");
-    this.parentClassLoader = parentClassLoader;
-  }
-
-  public void setJarExplorer(JarExplorer jarExplorer) {
-    this.jarExplorer = jarExplorer;
+  public DomainClassLoaderFactory(ClassLoader containerClassLoader) {
+    checkArgument(containerClassLoader != null, "parentClassLoader cannot be null");
+    this.containerClassLoader = containerClassLoader;
   }
 
   /**
@@ -102,7 +94,7 @@ public class DomainClassLoaderFactory implements DeployableArtifactClassLoaderFa
     final ClassLoaderLookupPolicy classLoaderLookupPolicy = getApplicationClassLoaderLookupPolicy(parent, domain);
 
     ArtifactClassLoader classLoader =
-        new MuleSharedDomainClassLoader(domain, parentClassLoader, classLoaderLookupPolicy, Arrays
+        new MuleSharedDomainClassLoader(domain, parent.getClassLoader(), classLoaderLookupPolicy, Arrays
           .asList(domain.getClassLoaderModel().getUrls()), artifactClassLoaders);
 
     return classLoader;
@@ -122,7 +114,7 @@ public class DomainClassLoaderFactory implements DeployableArtifactClassLoaderFa
   }
 
   private ArtifactClassLoader getDefaultDomainClassLoader(ClassLoaderLookupPolicy containerLookupPolicy) {
-    return new MuleSharedDomainClassLoader(new DomainDescriptor(DEFAULT_DOMAIN_NAME), parentClassLoader,
+    return new MuleSharedDomainClassLoader(new DomainDescriptor(DEFAULT_DOMAIN_NAME), containerClassLoader,
                                            containerLookupPolicy.extend(emptyMap()), emptyList(), emptyList());
   }
 

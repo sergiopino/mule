@@ -9,10 +9,11 @@ package org.mule.runtime.deployment.model.internal.application;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.mule.runtime.api.util.Preconditions.checkArgument;
 import static org.mule.runtime.api.util.Preconditions.checkState;
-import static org.mule.runtime.module.artifact.classloader.ParentOnlyLookupStrategy.PARENT_ONLY;
+import static org.mule.runtime.module.artifact.classloader.ParentFirstLookupStrategy.PARENT_FIRST;
 import org.mule.runtime.deployment.model.api.application.Application;
 import org.mule.runtime.deployment.model.api.application.ApplicationDescriptor;
 import org.mule.runtime.deployment.model.api.domain.Domain;
+import org.mule.runtime.deployment.model.api.domain.DomainDescriptor;
 import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginDescriptor;
 import org.mule.runtime.deployment.model.internal.AbstractArtifactClassLoaderBuilder;
 import org.mule.runtime.module.artifact.classloader.ArtifactClassLoader;
@@ -109,7 +110,13 @@ public class ApplicationClassLoaderBuilder extends AbstractArtifactClassLoaderBu
   @Override protected ClassLoaderLookupPolicy getParentLookupPolicy(ArtifactClassLoader parentClassLoader) {
     Map<String, LookupStrategy> lookupStrategies = new HashMap<>();
 
-    parentClassLoader.getArtifactDescriptor().getClassLoaderModel().getExportedPackages().forEach(p -> lookupStrategies.put(p, PARENT_ONLY));
+    DomainDescriptor descriptor = parentClassLoader.getArtifactDescriptor();
+    descriptor .getClassLoaderModel().getExportedPackages().forEach(p -> lookupStrategies.put(p, PARENT_FIRST));
+
+    for (ArtifactPluginDescriptor artifactPluginDescriptor : descriptor.getPlugins()) {
+      artifactPluginDescriptor.getClassLoaderModel().getExportedPackages()
+        .forEach(p -> lookupStrategies.put(p, PARENT_FIRST));
+    }
 
     return parentClassLoader.getClassLoaderLookupPolicy().extend(lookupStrategies);
   }
