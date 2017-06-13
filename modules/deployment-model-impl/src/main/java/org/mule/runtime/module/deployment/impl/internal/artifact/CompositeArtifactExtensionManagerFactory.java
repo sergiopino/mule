@@ -5,7 +5,7 @@
  * LICENSE.txt file.
  */
 
-package org.mule.runtime.module.deployment.impl.internal.policy;
+package org.mule.runtime.module.deployment.impl.internal.artifact;
 
 import static org.mule.runtime.api.util.Preconditions.checkArgument;
 import org.mule.runtime.core.api.MuleContext;
@@ -13,6 +13,8 @@ import org.mule.runtime.core.api.extension.ExtensionManager;
 import org.mule.runtime.deployment.model.api.DeployableArtifact;
 import org.mule.runtime.deployment.model.api.plugin.ArtifactPlugin;
 import org.mule.runtime.deployment.model.api.policy.PolicyTemplate;
+import org.mule.runtime.module.deployment.impl.internal.policy.ArtifactExtensionManagerFactory;
+import org.mule.runtime.module.deployment.impl.internal.policy.CompositeArtifactExtensionManager;
 import org.mule.runtime.module.extension.internal.loader.ExtensionModelLoaderRepository;
 import org.mule.runtime.module.extension.internal.manager.ExtensionManagerFactory;
 
@@ -21,9 +23,7 @@ import java.util.List;
 /**
  * Creates extension managers for {@link PolicyTemplate} artifacts
  */
-// TODO(pablo.kraan): domains - move this class to another package
-// TODO(pablo.kraan): domains - rename this class to make it more generic
-public class PolicyTemplateExtensionManagerFactory extends ArtifactExtensionManagerFactory {
+public class CompositeArtifactExtensionManagerFactory extends ArtifactExtensionManagerFactory {
 
   private final DeployableArtifact parentArtifact;
 
@@ -34,10 +34,10 @@ public class PolicyTemplateExtensionManagerFactory extends ArtifactExtensionMana
    * @param artifactPlugins artifact plugins deployed inside the artifact. Non null.
    * @param extensionManagerFactory creates the {@link ExtensionManager} for the artifact. Non null
    */
-  public PolicyTemplateExtensionManagerFactory(DeployableArtifact parentArtifact,
-                                               ExtensionModelLoaderRepository extensionModelLoaderRepository,
-                                               List<ArtifactPlugin> artifactPlugins,
-                                               ExtensionManagerFactory extensionManagerFactory) {
+  public CompositeArtifactExtensionManagerFactory(DeployableArtifact parentArtifact,
+                                                  ExtensionModelLoaderRepository extensionModelLoaderRepository,
+                                                  List<ArtifactPlugin> artifactPlugins,
+                                                  ExtensionManagerFactory extensionManagerFactory) {
     super(artifactPlugins, extensionModelLoaderRepository, extensionManagerFactory);
 
     checkArgument(parentArtifact != null, "application cannot be null");

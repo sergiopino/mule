@@ -49,7 +49,6 @@ import org.mule.runtime.module.artifact.serializer.ArtifactObjectSerializer;
 import org.mule.runtime.module.deployment.impl.internal.application.ApplicationMuleContextBuilder;
 import org.mule.runtime.module.deployment.impl.internal.domain.DomainMuleContextBuilder;
 import org.mule.runtime.module.deployment.impl.internal.policy.ArtifactExtensionManagerFactory;
-import org.mule.runtime.module.deployment.impl.internal.policy.PolicyTemplateExtensionManagerFactory;
 import org.mule.runtime.module.extension.internal.loader.ExtensionModelLoaderRepository;
 import org.mule.runtime.module.extension.internal.manager.DefaultExtensionManagerFactory;
 import org.mule.runtime.module.extension.internal.manager.ExtensionManagerFactory;
@@ -346,7 +345,7 @@ public class ArtifactContextBuilder {
           } else {
             //return new CompositeArtifactExtensionManager(applicationExtensionManager, policyExtensionManager);
             // TODO(pablo.kraan): domains - change the factory to receive the context instead of the parent artifact or get a reference t the real parent artifact
-            extensionManagerFactory = new PolicyTemplateExtensionManagerFactory(new DeployableArtifact() {
+            extensionManagerFactory = new CompositeArtifactExtensionManagerFactory(new DeployableArtifact() {
 
               @Override
               public void install() throws InstallException {
@@ -423,8 +422,8 @@ public class ArtifactContextBuilder {
                 return null;
               }
             }, extensionModelLoaderRepository,
-                                                                                artifactPlugins,
-                                                                                new DefaultExtensionManagerFactory());
+                                                                                   artifactPlugins,
+                                                                                   new DefaultExtensionManagerFactory());
           }
 
         }
