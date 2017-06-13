@@ -9,20 +9,24 @@ package org.mule.runtime.deployment.model.internal.application;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.mule.runtime.api.util.Preconditions.checkArgument;
 import static org.mule.runtime.api.util.Preconditions.checkState;
+import static org.mule.runtime.module.artifact.classloader.ParentOnlyLookupStrategy.PARENT_ONLY;
 import org.mule.runtime.deployment.model.api.application.Application;
 import org.mule.runtime.deployment.model.api.application.ApplicationDescriptor;
 import org.mule.runtime.deployment.model.api.domain.Domain;
 import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginDescriptor;
-import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginRepository;
 import org.mule.runtime.deployment.model.internal.AbstractArtifactClassLoaderBuilder;
 import org.mule.runtime.module.artifact.classloader.ArtifactClassLoader;
 import org.mule.runtime.module.artifact.classloader.ArtifactClassLoaderFactory;
+import org.mule.runtime.module.artifact.classloader.ClassLoaderLookupPolicy;
 import org.mule.runtime.module.artifact.classloader.DeployableArtifactClassLoaderFactory;
+import org.mule.runtime.module.artifact.classloader.LookupStrategy;
 import org.mule.runtime.module.artifact.classloader.MuleDeployableArtifactClassLoader;
 import org.mule.runtime.module.artifact.classloader.RegionClassLoader;
 import org.mule.runtime.module.artifact.descriptor.ArtifactDescriptor;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * {@link ArtifactClassLoader} builder for class loaders required by {@link Application} artifacts
@@ -100,5 +104,13 @@ public class ApplicationClassLoaderBuilder extends AbstractArtifactClassLoaderBu
     checkArgument(!isEmpty(applicationName), "applicationName cannot be empty");
 
     return domainId + "/app/" + applicationName;
+  }
+
+  @Override protected ClassLoaderLookupPolicy getParentLookupPolicy(ArtifactClassLoader parentClassLoader) {
+    Map<String, LookupStrategy> lookupStrategies = new HashMap<>();
+
+    parentClassLoader.getArtifactDescriptor().getClassLoaderModel().getExportedPackages().forEach(p -> lookupStrategies.put(p, PARENT_ONLY));
+
+    return parentClassLoader.getClassLoaderLookupPolicy().extend(lookupStrategies);
   }
 }

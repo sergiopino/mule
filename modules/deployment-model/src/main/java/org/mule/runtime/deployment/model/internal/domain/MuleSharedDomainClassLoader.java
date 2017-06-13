@@ -12,6 +12,7 @@ import static org.mule.runtime.deployment.model.internal.domain.DomainClassLoade
 import org.mule.runtime.module.artifact.classloader.ArtifactClassLoader;
 import org.mule.runtime.module.artifact.classloader.ClassLoaderLookupPolicy;
 import org.mule.runtime.module.artifact.classloader.MuleArtifactClassLoader;
+import org.mule.runtime.module.artifact.classloader.MuleDeployableArtifactClassLoader;
 import org.mule.runtime.module.artifact.descriptor.ArtifactDescriptor;
 import org.mule.runtime.module.reboot.api.MuleContainerBootstrapUtils;
 
@@ -23,15 +24,17 @@ import java.util.List;
 /**
  * Defines a {@link MuleArtifactClassLoader} for a domain artifact.
  */
-public class MuleSharedDomainClassLoader extends MuleArtifactClassLoader implements ArtifactClassLoader {
+public class MuleSharedDomainClassLoader extends MuleDeployableArtifactClassLoader implements ArtifactClassLoader {
 
   static {
     registerAsParallelCapable();
   }
 
   public MuleSharedDomainClassLoader(ArtifactDescriptor artifactDescriptor, ClassLoader parent,
-                                     ClassLoaderLookupPolicy lookupPolicy, List<URL> urls) {
-    super(getDomainId(artifactDescriptor.getName()), artifactDescriptor, urls.toArray(new URL[0]), parent, lookupPolicy);
+                                     ClassLoaderLookupPolicy lookupPolicy, List<URL> urls,
+                                     List<ArtifactClassLoader> artifactPluginClassLoaders) {
+    super(getDomainId(artifactDescriptor.getName()), artifactDescriptor, urls.toArray(new URL[0]), parent, lookupPolicy,
+          artifactPluginClassLoaders);
   }
 
   @Override

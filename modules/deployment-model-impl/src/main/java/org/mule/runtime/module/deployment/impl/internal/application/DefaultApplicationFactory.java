@@ -136,6 +136,7 @@ public class DefaultApplicationFactory implements ArtifactFactory<Application> {
     List<ArtifactPluginDescriptor> resolvedArtifactPluginDescriptors =
         pluginDependenciesResolver.resolve(applicationPluginDescriptors);
 
+    // TODO(pablo.kraan): domains - need something like this on the DefaultDomainFactory
     ApplicationClassLoaderBuilder artifactClassLoaderBuilder =
         applicationClassLoaderBuilderFactory.createArtifactClassLoaderBuilder();
     MuleDeployableArtifactClassLoader applicationClassLoader =

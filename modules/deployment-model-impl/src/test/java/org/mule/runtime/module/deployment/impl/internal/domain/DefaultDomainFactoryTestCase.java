@@ -39,7 +39,7 @@ public class DefaultDomainFactoryTestCase extends AbstractDomainTestCase {
                                                                                   .getClassLoader()),
     null, new DefaultDomainManager(), containerClassLoader,
     null,
-    serviceRepository);
+    serviceRepository, null, null, null, null);
 
   public DefaultDomainFactoryTestCase() throws IOException {}
 

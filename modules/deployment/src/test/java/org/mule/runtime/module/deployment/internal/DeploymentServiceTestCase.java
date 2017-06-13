@@ -1997,11 +1997,11 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     final String domainId = "shared-lib";
     final ApplicationFileBuilder applicationFileBuilder =
         new ApplicationFileBuilder("shared-lib-precedence-app").definedBy("app-shared-lib-precedence-config.xml")
-            .dependingOn(new JarFileBuilder("barUtils2_0", barUtils2_0JarFile))
+            .dependingOnSharedLibrary(new JarFileBuilder("barUtils2_0", barUtils2_0JarFile))
             .containingClass(pluginEcho1TestClassFile, "org/foo/Plugin1Echo.class")
             .deployedWith(PROPERTY_DOMAIN, domainId);
     final DomainFileBuilder domainFileBuilder =
-        new DomainFileBuilder(domainId).usingLibrary(barUtils1_0JarFile.getAbsolutePath())
+        new DomainFileBuilder(domainId).dependingOnSharedLibrary(new JarFileBuilder("barUtils1_0", barUtils1_0JarFile))
             .containing(applicationFileBuilder);
 
     addPackedDomainFromBuilder(domainFileBuilder);
@@ -2020,11 +2020,13 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
         new ArtifactPluginFileBuilder("echoPlugin1").configuredWith(EXPORTED_CLASS_PACKAGES_PROPERTY, "org.foo")
             .containingClass(pluginEcho1TestClassFile, "org/foo/Plugin1Echo.class")
             .dependingOn(new JarFileBuilder("barUtils2_0", barUtils2_0JarFile));
+
     final ApplicationFileBuilder applicationFileBuilder =
         new ApplicationFileBuilder("shared-lib-precedence-app").definedBy("app-shared-lib-precedence-config.xml")
             .dependingOn(pluginFileBuilder).deployedWith(PROPERTY_DOMAIN, domainId);
+
     final DomainFileBuilder domainFileBuilder =
-        new DomainFileBuilder(domainId).usingLibrary(barUtils1_0JarFile.getAbsolutePath())
+        new DomainFileBuilder(domainId).dependingOnSharedLibrary(new JarFileBuilder("barUtils1.0", barUtils1_0JarFile))
             .containing(applicationFileBuilder);
 
     addPackedDomainFromBuilder(domainFileBuilder);
@@ -2722,7 +2724,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     addPackedDomainFromBuilder(emptyDomainFileBuilder);
 
     TestDomainFactory testDomainFactory =
-      TestDomainFactory.createDomainFactory(containerClassLoader, serviceManager, createDescriptorLoaderRepository());
+      TestDomainFactory.createDomainFactory(new DomainClassLoaderFactory(containerClassLoader.getClassLoader()), containerClassLoader, serviceManager, moduleRepository, createDescriptorLoaderRepository());
     testDomainFactory.setMuleContextListenerFactory(new DeploymentMuleContextListenerFactory(domainDeploymentListener));
     testDomainFactory.setFailOnStopApplication();
 
@@ -2743,7 +2745,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     addPackedDomainFromBuilder(emptyDomainFileBuilder);
 
     TestDomainFactory testDomainFactory =
-      TestDomainFactory.createDomainFactory(containerClassLoader, serviceManager, createDescriptorLoaderRepository());
+      TestDomainFactory.createDomainFactory(new DomainClassLoaderFactory(containerClassLoader.getClassLoader()), containerClassLoader, serviceManager, moduleRepository, createDescriptorLoaderRepository());
     testDomainFactory.setMuleContextListenerFactory(new DeploymentMuleContextListenerFactory(domainDeploymentListener));
     testDomainFactory.setFailOnDisposeApplication();
     deploymentService.setDomainFactory(testDomainFactory);
@@ -3855,7 +3857,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
                                  new DomainClassLoaderFactory(getClass().getClassLoader())
                                      .create("domain/" + DEFAULT_DOMAIN_NAME, containerClassLoader,
                                              new DomainDescriptor(DEFAULT_DOMAIN_NAME), emptyList()),
-                                 artifactClassLoaderManager, serviceManager);
+                                 artifactClassLoaderManager, serviceManager, emptyList());
   }
 
   /**

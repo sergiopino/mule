@@ -39,6 +39,7 @@ import org.mule.runtime.module.deployment.impl.internal.artifact.DefaultClassLoa
 import org.mule.runtime.module.deployment.impl.internal.artifact.ServiceRegistryDescriptorLoaderRepository;
 import org.mule.runtime.module.deployment.impl.internal.domain.DefaultDomainFactory;
 import org.mule.runtime.module.deployment.impl.internal.domain.DefaultDomainManager;
+import org.mule.runtime.module.deployment.impl.internal.domain.DomainClassLoaderBuilderFactory;
 import org.mule.runtime.module.deployment.impl.internal.domain.DomainDescriptorFactory;
 import org.mule.runtime.module.deployment.impl.internal.plugin.ArtifactPluginDescriptorFactory;
 import org.mule.runtime.module.deployment.impl.internal.plugin.ArtifactPluginDescriptorLoader;
@@ -77,6 +78,7 @@ public class MuleArtifactResourcesRegistry {
   // TODO(pablo.kraan): domains - check if this field is needed
   private final ModuleRepository moduleRepository;
   private final ApplicationClassLoaderBuilderFactory applicationClassLoaderBuilderFactory;
+  private final DomainClassLoaderBuilderFactory domainClassLoaderBuilderFactory;
   private final DomainDescriptorFactory domainDescriptorFactory;
   private final ApplicationDescriptorFactory applicationDescriptorFactory;
   private final PluginDependenciesResolver pluginDependenciesResolver;
@@ -145,6 +147,8 @@ public class MuleArtifactResourcesRegistry {
     pluginDependenciesResolver = new BundlePluginDependenciesResolver(artifactPluginDescriptorFactory);
     applicationClassLoaderBuilderFactory =
         new ApplicationClassLoaderBuilderFactory(applicationClassLoaderFactory, this.artifactPluginClassLoaderFactory);
+    domainClassLoaderBuilderFactory =
+      new DomainClassLoaderBuilderFactory(containerClassLoader, domainClassLoaderFactory, this.artifactPluginClassLoaderFactory);
     ArtifactClassLoaderFactory<ServiceDescriptor> serviceClassLoaderFactory = new ServiceClassLoaderFactory();
     serviceManager =
         new MuleServiceManager(new DefaultServiceDiscoverer(
@@ -153,7 +157,7 @@ public class MuleArtifactResourcesRegistry {
                                                             new ReflectionServiceResolver(new ReflectionServiceProviderResolutionHelper())));
     extensionModelLoaderManager = new MuleExtensionModelLoaderManager(containerClassLoader);
     domainFactory = new DefaultDomainFactory(this.domainClassLoaderFactory, domainDescriptorFactory, domainManager, containerClassLoader,
-                                             artifactClassLoaderManager, serviceManager);
+                                             artifactClassLoaderManager, serviceManager, artifactPluginDescriptorLoader, artifactPluginRepository, pluginDependenciesResolver, domainClassLoaderBuilderFactory);
 
     DeployableArtifactClassLoaderFactory<PolicyTemplateDescriptor> policyClassLoaderFactory =
         trackDeployableArtifactClassLoaderFactory(new PolicyTemplateClassLoaderFactory());

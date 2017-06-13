@@ -116,13 +116,13 @@ public abstract class AbstractArtifactClassLoaderBuilder<T extends AbstractArtif
     parentClassLoader = getParentClassLoader();
     checkState(parentClassLoader != null, "parent class loader cannot be null");
     final String artifactId = getArtifactId(artifactDescriptor);
-    RegionClassLoader regionClassLoader =
-        new RegionClassLoader(artifactId, artifactDescriptor, parentClassLoader.getClassLoader(),
-                              parentClassLoader.getClassLoaderLookupPolicy());
+    ClassLoaderLookupPolicy parentLookupPolicy = getParentLookupPolicy(parentClassLoader);
+    RegionClassLoader regionClassLoader = new RegionClassLoader(artifactId, artifactDescriptor, parentClassLoader.getClassLoader(),
+                              parentLookupPolicy);
 
     ArtifactClassLoaderFilter artifactClassLoaderFilter =
         createArtifactClassLoaderFilter(artifactDescriptor.getClassLoaderModel(),
-                                        parentClassLoader.getClassLoaderLookupPolicy());
+                                        parentLookupPolicy);
 
     Map<String, LookupStrategy> appAdditionalLookupStrategy = new HashMap<>();
     artifactClassLoaderFilter.getExportedClassPackages().stream().forEach(p -> appAdditionalLookupStrategy.put(p, PARENT_FIRST));
@@ -139,11 +139,16 @@ public abstract class AbstractArtifactClassLoaderBuilder<T extends AbstractArtif
     for (ArtifactPluginDescriptor artifactPluginDescriptor : artifactPluginDescriptors) {
       final ArtifactClassLoaderFilter classLoaderFilter =
           createPluginClassLoaderFilter(artifactPluginDescriptor, artifactDescriptor.getClassLoaderModel().getExportedPackages(),
-                                        parentClassLoader.getClassLoaderLookupPolicy());
+                                        parentLookupPolicy);
       regionClassLoader.addClassLoader(pluginClassLoaders.get(artifactPluginIndex), classLoaderFilter);
       artifactPluginIndex++;
     }
     return artifactClassLoader;
+  }
+
+  // TODO(pablo.kraan): domains - add javadoc
+  protected ClassLoaderLookupPolicy getParentLookupPolicy(ArtifactClassLoader parentClassLoader) {
+    return parentClassLoader.getClassLoaderLookupPolicy();
   }
 
   /**

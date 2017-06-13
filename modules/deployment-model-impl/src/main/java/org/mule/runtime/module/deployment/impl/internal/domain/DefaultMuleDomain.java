@@ -28,6 +28,7 @@ import org.mule.runtime.deployment.model.api.DeploymentStopException;
 import org.mule.runtime.deployment.model.api.artifact.ArtifactContext;
 import org.mule.runtime.deployment.model.api.domain.Domain;
 import org.mule.runtime.deployment.model.api.domain.DomainDescriptor;
+import org.mule.runtime.deployment.model.api.plugin.ArtifactPlugin;
 import org.mule.runtime.module.artifact.classloader.ArtifactClassLoader;
 import org.mule.runtime.module.artifact.classloader.ClassLoaderRepository;
 import org.mule.runtime.module.deployment.impl.internal.artifact.ArtifactContextBuilder;
@@ -38,6 +39,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import java.util.Scanner;
 
 import org.slf4j.Logger;
@@ -49,6 +51,7 @@ public class DefaultMuleDomain implements Domain {
 
   private final DomainDescriptor descriptor;
   private final ServiceRepository serviceRepository;
+  private final List<ArtifactPlugin> artifactPlugins;
   private MuleContextListener muleContextListener;
   private ArtifactClassLoader deploymentClassLoader;
   private final ClassLoaderRepository classLoaderRepository;
@@ -57,11 +60,13 @@ public class DefaultMuleDomain implements Domain {
   private ArtifactContext artifactContext;
 
   public DefaultMuleDomain(DomainDescriptor descriptor, ArtifactClassLoader deploymentClassLoader,
-                           ClassLoaderRepository classLoaderRepository, ServiceRepository serviceRepository) {
+                           ClassLoaderRepository classLoaderRepository, ServiceRepository serviceRepository,
+                           List<ArtifactPlugin> artifactPlugins) {
     this.deploymentClassLoader = deploymentClassLoader;
     this.classLoaderRepository = classLoaderRepository;
     this.descriptor = descriptor;
     this.serviceRepository = serviceRepository;
+    this.artifactPlugins = artifactPlugins;
     refreshClassLoaderAndLoadConfigResourceFile();
   }
 
@@ -135,6 +140,7 @@ public class DefaultMuleDomain implements Domain {
         validateConfigurationFileDoNotUsesCoreNamespace();
 
         ArtifactContextBuilder artifactBuilder = newBuilder().setArtifactName(getArtifactName())
+            .setArtifactPlugins(artifactPlugins)
             .setExecutionClassloader(deploymentClassLoader.getClassLoader())
             .setArtifactInstallationDirectory(new File(MuleContainerBootstrapUtils.getMuleDomainsDir(), getArtifactName()))
             .setConfigurationFiles(new String[] {this.configResourceFile.getAbsolutePath()}).setArtifactType(DOMAIN)
