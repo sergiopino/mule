@@ -86,7 +86,6 @@ public class ArtifactContextBuilder {
   private String artifactName = getUUID();
   private MuleContextBuilder muleContextBuilder;
   private ClassLoader executionClassLoader;
-  private MuleContext parentContext;
   private File artifactInstallationDirectory;
   private MuleContextListener muleContextListener;
   private String defaultEncoding;
@@ -375,8 +374,8 @@ public class ArtifactContextBuilder {
                     .setArtifactType(artifactType)
                     .setEnableLazyInitialization(enableLazyInit)
                     .setServiceConfigurators(serviceConfigurators);
-            if (parentContext != null) {
-              artifactContextConfigurationBuilder.setParentContext(parentContext);
+            if (parentArtifact != null) {
+              artifactContextConfigurationBuilder.setParentContext(parentArtifact.getMuleContext());
             }
             artifactContext
                 .set(artifactConfigurationProcessor.createArtifactContext(artifactContextConfigurationBuilder.build()));

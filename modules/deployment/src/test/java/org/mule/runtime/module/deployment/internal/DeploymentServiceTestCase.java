@@ -2506,6 +2506,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
   }
 
   // TODO(pablo.kraan): domains - add test - plugin in domain + same plugin in app
+  // TODO(pablo.kraan): domains - add test - plugin in domain + same plugin in app + same plugin in policy
 
   protected void alterTimestampIfNeeded(File file, long firstTimestamp) {
     if (!file.exists()) {
