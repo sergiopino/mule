@@ -371,6 +371,11 @@ public class DefaultMuleApplication implements Application {
   }
 
   @Override
+  public List<ArtifactPlugin> getArtifactPlugins() {
+    return artifactPlugins;
+  }
+
+  @Override
   public String toString() {
     return format("%s[%s]@%s", getClass().getName(), descriptor.getName(), Integer.toHexString(System.identityHashCode(this)));
   }

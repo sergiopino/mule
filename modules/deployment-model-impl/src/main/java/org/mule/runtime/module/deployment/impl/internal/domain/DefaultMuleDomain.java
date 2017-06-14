@@ -113,6 +113,11 @@ public class DefaultMuleDomain implements Domain {
   }
 
   @Override
+  public List<ArtifactPlugin> getArtifactPlugins() {
+    return artifactPlugins;
+  }
+
+  @Override
   public void install() {
     if (logger.isInfoEnabled()) {
       logger.info(miniSplash(String.format("New domain '%s'", getArtifactName())));

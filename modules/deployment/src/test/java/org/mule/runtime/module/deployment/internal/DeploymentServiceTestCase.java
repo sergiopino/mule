@@ -2525,7 +2525,6 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     executeApplicationFlow("main");
   }
 
-  // TODO(pablo.kraan): domains - add this test
   @Test
   public void failsToDeployAppWithDomainPluginVersionMismatch() throws Exception {
     installEchoService();
@@ -2548,9 +2547,90 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     assertDeploymentFailure(applicationDeploymentListener, applicationFileBuilder.getId());
   }
 
-  // TODO(pablo.kraan): domain - add test appliesApplicationPolicyUsingDomainPlugin
-  // TODO(pablo.kraan): domain - add test appliesApplicationPolicyDuplicatingDomainPlugin
-  // TODO(pablo.kraan): domain - add test failsToApplyApplicationPolicyWithDomainPluginVersionMismatch
+  @Test
+  public void appliesApplicationPolicyUsingDomainPlugin() throws Exception {
+    installEchoService();
+    installFooService();
+    
+    policyManager.registerPolicyTemplate(policyIncludingPluginFileBuilder.getArtifactFile());
+
+    ApplicationFileBuilder applicationFileBuilder =
+      new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
+        .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
+
+    DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
+      .dependingOn(helloExtensionV1Plugin)
+      .containing(applicationFileBuilder);
+
+    addPackedDomainFromBuilder(domainFileBuilder);
+
+    startDeployment();
+    assertApplicationDeploymentSuccess(applicationDeploymentListener, applicationFileBuilder.getId());
+
+    policyManager.addPolicy(applicationFileBuilder.getId(), policyIncludingPluginFileBuilder.getId(),
+                            new PolicyParametrization(FOO_POLICY_ID, s -> true, 1, emptyMap(),
+                                                      getResourceFile("/appPluginPolicy.xml")));
+
+    executeApplicationFlow("main");
+    assertThat(invocationCount, equalTo(1));
+  }
+
+  @Test
+  public void appliesApplicationPolicyDuplicatingDomainPlugin() throws Exception {
+    installEchoService();
+    installFooService();
+
+    policyManager.registerPolicyTemplate(policyIncludingPluginFileBuilder.getArtifactFile());
+
+    ApplicationFileBuilder applicationFileBuilder =
+      new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
+        .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
+
+    DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
+      .dependingOn(helloExtensionV1Plugin)
+      .containing(applicationFileBuilder);
+
+    addPackedDomainFromBuilder(domainFileBuilder);
+
+    startDeployment();
+    assertApplicationDeploymentSuccess(applicationDeploymentListener, applicationFileBuilder.getId());
+
+    policyManager.addPolicy(applicationFileBuilder.getId(), policyIncludingPluginFileBuilder.getId(),
+                            new PolicyParametrization(FOO_POLICY_ID, s -> true, 1, emptyMap(),
+                                                      getResourceFile("/appPluginPolicy.xml")));
+
+    executeApplicationFlow("main");
+    assertThat(invocationCount, equalTo(1));
+  }
+
+  @Test
+  public void failsToApplyApplicationPolicyWithDomainPluginVersionMismatch() throws Exception {
+    installEchoService();
+    installFooService();
+
+    policyManager.registerPolicyTemplate(policyIncludingHelloPluginV2FileBuilder.getArtifactFile());
+
+    ApplicationFileBuilder applicationFileBuilder =
+      new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
+        .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
+
+    DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
+      .dependingOn(helloExtensionV1Plugin)
+      .containing(applicationFileBuilder);
+
+    addPackedDomainFromBuilder(domainFileBuilder);
+
+    startDeployment();
+    assertApplicationDeploymentSuccess(applicationDeploymentListener, applicationFileBuilder.getId());
+
+    try {
+      policyManager.addPolicy(applicationFileBuilder.getId(), policyIncludingHelloPluginV2FileBuilder.getId(),
+                              new PolicyParametrization(FOO_POLICY_ID, s -> true, 1, emptyMap(),
+                                                        getResourceFile("/appPluginPolicy.xml")));
+      fail("Policy application should have failed");
+    } catch (PolicyRegistrationException expected) {
+    }
+  }
 
   protected void alterTimestampIfNeeded(File file, long firstTimestamp) {
     if (!file.exists()) {

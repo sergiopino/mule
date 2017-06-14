@@ -123,7 +123,6 @@ public class ApplicationDescriptorFactory implements ArtifactDescriptorFactory<A
     descriptor.setRootFolder(applicationFolder);
     descriptor.setBundleDescriptor(getBundleDescriptor(applicationFolder, muleApplicationModel));
     descriptor.setMinMuleVersion(new MuleVersion(muleApplicationModel.getMinMuleVersion()));
-    // TODO(pablo.kraan): domains - check if encoding is something that is still configured in the app
     descriptor.setRedeploymentEnabled(muleApplicationModel.isRedeploymentEnabled());
     muleApplicationModel.getDomain().ifPresent(domain -> {
       descriptor.setDomain(domain);

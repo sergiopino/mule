@@ -166,7 +166,6 @@ public class ApplicationFileBuilder extends DeployableFileBuilder<ApplicationFil
       customResources.add(appProperties);
     }
 
-    // TODO(pablo.kraan): domains - there is no test covering these two lines, deploy properties are always empty
     Object redeploymentEnabled = deployProperties.get(PROPERTY_REDEPLOYMENT_ENABLED);
     Object configResources = deployProperties.get(PROPERTY_CONFIG_RESOURCES);
     File applicationDescriptor = createApplicationJsonDescriptorFile(
