@@ -333,11 +333,9 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
       new ArtifactPluginFileBuilder("appResourcePlugin").configuredWith(EXPORTED_CLASS_PACKAGES_PROPERTY, "org.foo.resource")
           .containingClass(resourceConsumerClassFile, "org/foo/resource/ResourceConsumer.class");
 
-  private final ArtifactPluginFileBuilder helloExtensionV1Plugin =
-      createHelloExtensionV1PluginFileBuilder();
+  private final ArtifactPluginFileBuilder helloExtensionV1Plugin = createHelloExtensionV1PluginFileBuilder();
 
-  private final ArtifactPluginFileBuilder helloExtensionV2Plugin =
-      createHelloExtensionV2PluginFileBuilder();
+  private final ArtifactPluginFileBuilder helloExtensionV2Plugin = createHelloExtensionV2PluginFileBuilder();
 
   private final ArtifactPluginFileBuilder simpleExtensionPlugin =
       new ArtifactPluginFileBuilder("simpleExtensionPlugin")
@@ -2528,26 +2526,27 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
   }
 
   // TODO(pablo.kraan): domains - add this test
-  //@Test
-  //public void failsToDeployAppWithDomainPluginVersionMismatch() throws Exception {
-  //  ApplicationFileBuilder applicationFileBuilder =
-  //    new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
-  //      .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle")
-  //    .dependingOn(helloExtensionV1Plugin);
-  //
-  //  DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
-  //    //.dependingOn(helloExtensionV2Plugin)
-  //    .containing(applicationFileBuilder);
-  //
-  //  addPackedDomainFromBuilder(domainFileBuilder);
-  //
-  //  startDeployment();
-  //
-  //  assertDeploymentFailure(applicationDeploymentListener, applicationFileBuilder.getId());
-  //  assertDeploymentSuccess(domainDeploymentListener, domainFileBuilder.getId());
-  //
-  //  executeApplicationFlow("main");
-  //}
+  @Test
+  public void failsToDeployAppWithDomainPluginVersionMismatch() throws Exception {
+    installEchoService();
+    installFooService();
+
+    ApplicationFileBuilder applicationFileBuilder =
+      new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
+        .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle")
+      .dependingOn(helloExtensionV2Plugin);
+
+    DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
+      .dependingOn(helloExtensionV1Plugin)
+      .containing(applicationFileBuilder);
+
+    addPackedDomainFromBuilder(domainFileBuilder);
+
+    startDeployment();
+
+    assertDeploymentSuccess(domainDeploymentListener, domainFileBuilder.getId());
+    assertDeploymentFailure(applicationDeploymentListener, applicationFileBuilder.getId());
+  }
 
   // TODO(pablo.kraan): domain - add test appliesApplicationPolicyUsingDomainPlugin
   // TODO(pablo.kraan): domain - add test appliesApplicationPolicyDuplicatingDomainPlugin
@@ -4269,7 +4268,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
         .addProperty(EXPORTED_RESOURCES,
                      asList("/", "META-INF/mule-hello.xsd", "META-INF/spring.handlers", "META-INF/spring.schemas"))
         .setId(MAVEN);
-    return new ArtifactPluginFileBuilder("helloExtensionPlugin")
+    return new ArtifactPluginFileBuilder("helloExtensionPlugin-2.0")
         .dependingOn(new JarFileBuilder("helloExtensionV2", helloExtensionV2JarFile))
         .describedBy((mulePluginModelBuilder.build()));
   }
@@ -4278,11 +4277,11 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     MulePluginModelBuilder mulePluginModelBuilder = new MulePluginModelBuilder()
         .setMinMuleVersion(MIN_MULE_VERSION).setName("helloExtensionPlugin")
         .withBundleDescriptorLoader(createBundleDescriptorLoader("helloExtensionPlugin", MULE_EXTENSION_CLASSIFIER,
-                                                                 PROPERTIES_BUNDLE_DESCRIPTOR_LOADER_ID));
+                                                                 PROPERTIES_BUNDLE_DESCRIPTOR_LOADER_ID, "1.0"));
     mulePluginModelBuilder.withClassLoaderModelDescriber().setId(MAVEN)
         .addProperty(EXPORTED_RESOURCES,
                      asList("/", "META-INF/mule-hello.xsd", "META-INF/spring.handlers", "META-INF/spring.schemas"));
-    return new ArtifactPluginFileBuilder("helloExtensionPlugin")
+    return new ArtifactPluginFileBuilder("helloExtensionPlugin-1.0")
         .dependingOn(new JarFileBuilder("helloExtensionV1", helloExtensionV1JarFile))
         .describedBy((mulePluginModelBuilder.build()));
   }

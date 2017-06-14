@@ -80,6 +80,7 @@ public class DefaultPolicyTemplateFactory implements PolicyTemplateFactory {
 
   private List<ArtifactPluginDescriptor> getArtifactPluginDescriptors(Set<ArtifactPluginDescriptor> appPlugins,
                                                                       PolicyTemplateDescriptor descriptor) {
+    // TODO(pablo.kraan): domains - this code is not correct as the app descriptor does not have the right info, as some plugins could be provided by the domain
     List<ArtifactPluginDescriptor> artifactPluginDescriptors = new ArrayList<>();
     for (ArtifactPluginDescriptor policyPluginDescriptor : descriptor.getPlugins()) {
       Optional<ArtifactPluginDescriptor> appPluginDescriptor =
