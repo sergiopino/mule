@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.deployment.model.internal.domain;
 
+import static java.util.Collections.emptyList;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -62,7 +63,7 @@ public class MuleSharedDomainClassLoaderTestCase extends AbstractMuleTestCase {
 
     MuleSharedDomainClassLoader classLoader = new MuleSharedDomainClassLoader(new ArtifactDescriptor(DEFAULT_DOMAIN_NAME),
                                                                               getClass().getClassLoader(), lookupPolicy, urls,
-                                                                              null);
+                                                                              emptyList());
 
     assertThat(classLoader.findResource(RESOURCE_FILE_NAME), notNullValue());
   }

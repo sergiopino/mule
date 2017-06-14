@@ -137,21 +137,22 @@ public class DefaultMuleDomain implements Domain {
     }
 
     try {
+      ArtifactContextBuilder artifactBuilder = newBuilder().setArtifactName(getArtifactName())
+          .setArtifactPlugins(artifactPlugins)
+          .setExecutionClassloader(deploymentClassLoader.getClassLoader())
+          .setArtifactInstallationDirectory(new File(MuleContainerBootstrapUtils.getMuleDomainsDir(), getArtifactName()))
+          .setArtifactType(DOMAIN)
+          .setEnableLazyInit(lazy).setClassLoaderRepository(classLoaderRepository).setServiceRepository(serviceRepository);
+
       if (this.configResourceFile != null) {
         validateConfigurationFileDoNotUsesCoreNamespace();
-
-        ArtifactContextBuilder artifactBuilder = newBuilder().setArtifactName(getArtifactName())
-            .setArtifactPlugins(artifactPlugins)
-            .setExecutionClassloader(deploymentClassLoader.getClassLoader())
-            .setArtifactInstallationDirectory(new File(MuleContainerBootstrapUtils.getMuleDomainsDir(), getArtifactName()))
-            .setConfigurationFiles(new String[] {this.configResourceFile.getAbsolutePath()}).setArtifactType(DOMAIN)
-            .setEnableLazyInit(lazy).setClassLoaderRepository(classLoaderRepository).setServiceRepository(serviceRepository);
-
-        if (muleContextListener != null) {
-          artifactBuilder.setMuleContextListener(muleContextListener);
-        }
-        artifactContext = artifactBuilder.build();
+        artifactBuilder.setConfigurationFiles(new String[] {this.configResourceFile.getAbsolutePath()});
       }
+
+      if (muleContextListener != null) {
+        artifactBuilder.setMuleContextListener(muleContextListener);
+      }
+      artifactContext = artifactBuilder.build();
     } catch (Exception e) {
       // log it here so it ends up in app log, sys log will only log a message without stacktrace
       logger.error(null, getRootCause(e));

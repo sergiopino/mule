@@ -15,7 +15,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mule.runtime.core.api.config.MuleProperties;
 import org.mule.runtime.deployment.model.api.DeploymentException;
 import org.mule.runtime.deployment.model.api.application.Application;
 import org.mule.runtime.deployment.model.api.application.ApplicationDescriptor;
@@ -36,7 +35,6 @@ import org.mule.runtime.module.deployment.impl.internal.policy.PolicyTemplateCla
 import org.mule.runtime.module.extension.internal.loader.ExtensionModelLoaderRepository;
 import org.mule.runtime.module.service.ServiceRepository;
 import org.mule.tck.junit4.AbstractMuleTestCase;
-import org.mule.tck.junit4.rule.SystemPropertyTemporaryFolder;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,7 +44,6 @@ import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
 
 public class DefaultApplicationFactoryTestCase extends AbstractMuleTestCase {
 
@@ -74,8 +71,6 @@ public class DefaultApplicationFactoryTestCase extends AbstractMuleTestCase {
                                     classLoaderRepository, policyTemplateClassLoaderBuilderFactory, pluginDependenciesResolver,
                                     artifactPluginDescriptorLoader);
 
-  @Rule
-  public TemporaryFolder muleHome = new SystemPropertyTemporaryFolder(MuleProperties.MULE_HOME_DIRECTORY_PROPERTY);
   @Rule
   public ExpectedException expectedException = ExpectedException.none();
 

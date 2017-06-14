@@ -40,7 +40,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -2277,7 +2276,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
 
     final Domain domain = findADomain(dummyDomainBundleFileBuilder.getId());
     assertNotNull(domain);
-    assertNull(domain.getMuleContext());
+    assertNotNull(domain.getMuleContext());
 
     assertApplicationDeploymentSuccess(applicationDeploymentListener, dummyAppDescriptorFileBuilder.getId());
     assertAppsDir(NONE, new String[] {dummyAppDescriptorFileBuilder.getId()}, true);
@@ -2505,7 +2504,51 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     executeApplicationFlow("main");
   }
 
-  // TODO(pablo.kraan): domain - add test failsToDeployAppWithDomainPluginVersionMismatch
+  @Test
+  public void deploysAppUsingDomainExtension() throws Exception {
+    installEchoService();
+    installFooService();
+
+    ApplicationFileBuilder applicationFileBuilder =
+        new ApplicationFileBuilder("appWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
+            .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
+
+    DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
+        .dependingOn(helloExtensionV1Plugin)
+        .containing(applicationFileBuilder);
+
+    addPackedDomainFromBuilder(domainFileBuilder);
+
+    startDeployment();
+
+    assertDeploymentSuccess(domainDeploymentListener, domainFileBuilder.getId());
+    assertDeploymentSuccess(applicationDeploymentListener, applicationFileBuilder.getId());
+
+    executeApplicationFlow("main");
+  }
+
+  // TODO(pablo.kraan): domains - add this test
+  //@Test
+  //public void failsToDeployAppWithDomainPluginVersionMismatch() throws Exception {
+  //  ApplicationFileBuilder applicationFileBuilder =
+  //    new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
+  //      .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle")
+  //    .dependingOn(helloExtensionV1Plugin);
+  //
+  //  DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
+  //    //.dependingOn(helloExtensionV2Plugin)
+  //    .containing(applicationFileBuilder);
+  //
+  //  addPackedDomainFromBuilder(domainFileBuilder);
+  //
+  //  startDeployment();
+  //
+  //  assertDeploymentFailure(applicationDeploymentListener, applicationFileBuilder.getId());
+  //  assertDeploymentSuccess(domainDeploymentListener, domainFileBuilder.getId());
+  //
+  //  executeApplicationFlow("main");
+  //}
+
   // TODO(pablo.kraan): domain - add test appliesApplicationPolicyUsingDomainPlugin
   // TODO(pablo.kraan): domain - add test appliesApplicationPolicyDuplicatingDomainPlugin
   // TODO(pablo.kraan): domain - add test failsToApplyApplicationPolicyWithDomainPluginVersionMismatch
@@ -3448,17 +3491,8 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
   private ApplicationFileBuilder createExtensionApplicationWithServices(String appConfigFile,
                                                                         ArtifactPluginFileBuilder... plugins)
       throws Exception {
-    final ServiceFileBuilder echoService =
-        new ServiceFileBuilder("echoService").configuredWith(SERVICE_PROVIDER_CLASS_NAME, "org.mule.echo.EchoServiceProvider")
-            .usingLibrary(defaulServiceEchoJarFile.getAbsolutePath());
-    File installedService = new File(services, echoService.getArtifactFile().getName());
-    copyFile(echoService.getArtifactFile(), installedService);
-
-    final ServiceFileBuilder fooService = new ServiceFileBuilder("fooService")
-        .configuredWith(SERVICE_PROVIDER_CLASS_NAME, "org.mule.service.foo.FooServiceProvider")
-        .usingLibrary(defaultFooServiceJarFile.getAbsolutePath());
-    installedService = new File(services, fooService.getArtifactFile().getName());
-    copyFile(fooService.getArtifactFile(), installedService);
+    installEchoService();
+    installFooService();
 
     ApplicationFileBuilder applicationFileBuilder = new ApplicationFileBuilder("appWithExtensionPlugin")
         .definedBy(appConfigFile);
@@ -3468,6 +3502,22 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     }
 
     return applicationFileBuilder;
+  }
+
+  private void installFooService() throws IOException {
+    installService("fooService", "org.mule.service.foo.FooServiceProvider", defaultFooServiceJarFile);
+  }
+
+  private void installEchoService() throws IOException {
+    installService("echoService", "org.mule.echo.EchoServiceProvider", defaulServiceEchoJarFile);
+  }
+
+  private void installService(String serviceName, String serviceProviderClassName, File serviceJarFile) throws IOException {
+    final ServiceFileBuilder echoService =
+        new ServiceFileBuilder(serviceName).configuredWith(SERVICE_PROVIDER_CLASS_NAME, serviceProviderClassName)
+            .usingLibrary(serviceJarFile.getAbsolutePath());
+    File installedService = new File(services, echoService.getArtifactFile().getName());
+    copyFile(echoService.getArtifactFile(), installedService);
   }
 
   private void doSynchronizedDomainDeploymentActionTest(final Action deploymentAction, final Action assertAction)

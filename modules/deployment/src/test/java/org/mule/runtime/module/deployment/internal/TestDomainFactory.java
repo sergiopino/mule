@@ -8,7 +8,6 @@ package org.mule.runtime.module.deployment.internal;
 
 import org.mule.runtime.container.api.ModuleRepository;
 import org.mule.runtime.deployment.model.api.domain.Domain;
-import org.mule.runtime.deployment.model.api.domain.DomainDescriptor;
 import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginClassLoaderFactory;
 import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginRepository;
 import org.mule.runtime.deployment.model.internal.domain.DomainClassLoaderFactory;
@@ -16,7 +15,6 @@ import org.mule.runtime.deployment.model.internal.plugin.BundlePluginDependencie
 import org.mule.runtime.deployment.model.internal.plugin.PluginDependenciesResolver;
 import org.mule.runtime.module.artifact.classloader.ArtifactClassLoader;
 import org.mule.runtime.module.artifact.classloader.ClassLoaderRepository;
-import org.mule.runtime.module.artifact.classloader.DeployableArtifactClassLoaderFactory;
 import org.mule.runtime.module.artifact.classloader.TrackingArtifactClassLoaderFactory;
 import org.mule.runtime.module.deployment.impl.internal.artifact.DefaultClassLoaderManager;
 import org.mule.runtime.module.deployment.impl.internal.artifact.DescriptorLoaderRepository;
@@ -58,14 +56,12 @@ public class TestDomainFactory extends DefaultDomainFactory {
                                             new TrackingArtifactClassLoaderFactory<>(artifactClassLoaderManager,
                                                                                      new ArtifactPluginClassLoaderFactory(moduleRepository)));
 
-    return new TestDomainFactory(new DomainClassLoaderFactory(TestDomainFactory.class.getClassLoader()),
-                                 containerClassLoader, artifactClassLoaderManager, serviceRepository, domainDescriptorFactory,
+    return new TestDomainFactory(artifactClassLoaderManager, serviceRepository, domainDescriptorFactory,
                                  artifactPluginDescriptorLoader, Collections::emptyList, pluginDependenciesResolver,
                                  domainClassLoaderBuilderFactory);
   }
 
-  private TestDomainFactory(DeployableArtifactClassLoaderFactory<DomainDescriptor> domainClassLoaderFactory,
-                            ArtifactClassLoader containerClassLoader, ClassLoaderRepository classLoaderRepository,
+  private TestDomainFactory(ClassLoaderRepository classLoaderRepository,
                             ServiceRepository serviceRepository, DomainDescriptorFactory domainDescriptorFactory,
                             ArtifactPluginDescriptorLoader pluginDescriptorLoader,
                             ArtifactPluginRepository artifactPluginRepository,

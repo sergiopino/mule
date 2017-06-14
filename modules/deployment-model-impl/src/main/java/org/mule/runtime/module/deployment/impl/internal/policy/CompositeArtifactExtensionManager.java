@@ -79,10 +79,16 @@ public class CompositeArtifactExtensionManager implements ExtensionManager {
   @Override
   public Optional<ConfigurationInstance> getConfiguration(ExtensionModel extensionModel, ComponentModel componentModel,
                                                           Event event) {
+    // TODO(pablo.kraan): domains - had to change this to make test pass :)
+    Optional<ConfigurationInstance> configuration = childExtensionManager.getConfiguration(extensionModel, componentModel, event);
 
-    Optional<ConfigurationProvider> provider = getConfigurationProvider(extensionModel, componentModel);
-    if (provider.isPresent()) {
-      return ofNullable(provider.get().get(event));
+    if (configuration.isPresent()) {
+      return configuration;
+    } else {
+      Optional<ConfigurationProvider> provider = getConfigurationProvider(extensionModel, componentModel);
+      if (provider.isPresent()) {
+        return ofNullable(provider.get().get(event));
+      }
     }
 
     throw new IllegalArgumentException(format(
