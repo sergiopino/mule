@@ -2486,7 +2486,7 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
   }
 
   @Test
-  public void deploysDomainWithPlugin() throws Exception {
+  public void deploysAppUsingDomainPlugin() throws Exception {
     ApplicationFileBuilder echoPluginAppFileBuilder =
         new ApplicationFileBuilder("dummyWithEchoPlugin").definedBy("app-with-echo-plugin-config.xml")
             .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
@@ -2505,8 +2505,10 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     executeApplicationFlow("main");
   }
 
-  // TODO(pablo.kraan): domains - add test - plugin in domain + same plugin in app
-  // TODO(pablo.kraan): domains - add test - plugin in domain + same plugin in app + same plugin in policy
+  // TODO(pablo.kraan): domain - add test failsToDeployAppWithDomainPluginVersionMismatch
+  // TODO(pablo.kraan): domain - add test appliesApplicationPolicyUsingDomainPlugin
+  // TODO(pablo.kraan): domain - add test appliesApplicationPolicyDuplicatingDomainPlugin
+  // TODO(pablo.kraan): domain - add test failsToApplyApplicationPolicyWithDomainPluginVersionMismatch
 
   protected void alterTimestampIfNeeded(File file, long firstTimestamp) {
     if (!file.exists()) {
