@@ -179,17 +179,17 @@ public class DefaultApplicationFactory implements ArtifactFactory<Application> {
     List<ArtifactPluginDescriptor> artifactPluginDescriptors = new ArrayList<>();
     for (ArtifactPluginDescriptor appPluginDescriptor : descriptor.getPlugins()) {
       Optional<ArtifactPluginDescriptor> domainPluginDescriptor =
-        findPlugin(domainPlugins, appPluginDescriptor.getBundleDescriptor());
+          findPlugin(domainPlugins, appPluginDescriptor.getBundleDescriptor());
 
       if (!domainPluginDescriptor.isPresent()) {
         artifactPluginDescriptors.add(appPluginDescriptor);
       } else if (!isCompatibleVersion(domainPluginDescriptor.get().getBundleDescriptor().getVersion(),
                                       appPluginDescriptor.getBundleDescriptor().getVersion())) {
         throw new IllegalStateException(
-          format("Incompatible version of plugin '%s' found. Application requires version'%s' but domain provides version'%s'",
-                 appPluginDescriptor.getName(),
-                 appPluginDescriptor.getBundleDescriptor().getVersion(),
-                 domainPluginDescriptor.get().getBundleDescriptor().getVersion()));
+                                        format("Incompatible version of plugin '%s' found. Application requires version'%s' but domain provides version'%s'",
+                                               appPluginDescriptor.getName(),
+                                               appPluginDescriptor.getBundleDescriptor().getVersion(),
+                                               domainPluginDescriptor.get().getBundleDescriptor().getVersion()));
       }
     }
     return artifactPluginDescriptors;
@@ -199,7 +199,7 @@ public class DefaultApplicationFactory implements ArtifactFactory<Application> {
                                                         BundleDescriptor bundleDescriptor) {
     for (ArtifactPluginDescriptor appPlugin : appPlugins) {
       if (appPlugin.getBundleDescriptor().getArtifactId().equals(bundleDescriptor.getArtifactId())
-        && appPlugin.getBundleDescriptor().getGroupId().equals(bundleDescriptor.getGroupId())) {
+          && appPlugin.getBundleDescriptor().getGroupId().equals(bundleDescriptor.getGroupId())) {
         return of(appPlugin);
       }
     }

@@ -104,7 +104,7 @@ public class DefaultPolicyTemplateFactory implements PolicyTemplateFactory {
   }
 
   private Optional<ArtifactPlugin> findPlugin(Set<ArtifactPlugin> appPlugins,
-                                                        BundleDescriptor bundleDescriptor) {
+                                              BundleDescriptor bundleDescriptor) {
     for (ArtifactPlugin appPlugin : appPlugins) {
       if (appPlugin.getDescriptor().getBundleDescriptor().getArtifactId().equals(bundleDescriptor.getArtifactId())
           && appPlugin.getDescriptor().getBundleDescriptor().getGroupId().equals(bundleDescriptor.getGroupId())) {

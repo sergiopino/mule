@@ -54,7 +54,8 @@ public class TestDomainWrapper implements Domain {
     return delegate.getMetadataService();
   }
 
-  @Override public List<ArtifactPlugin> getArtifactPlugins() {
+  @Override
+  public List<ArtifactPlugin> getArtifactPlugins() {
     return delegate.getArtifactPlugins();
   }
 

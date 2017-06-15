@@ -64,7 +64,8 @@ public class DeployableArtifactWrapper<T extends DeployableArtifact<D>, D extend
     return getDelegate().getMetadataService();
   }
 
-  @Override public List<ArtifactPlugin> getArtifactPlugins() {
+  @Override
+  public List<ArtifactPlugin> getArtifactPlugins() {
     return delegate.getArtifactPlugins();
   }
 

@@ -2531,13 +2531,13 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     installFooService();
 
     ApplicationFileBuilder applicationFileBuilder =
-      new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
-        .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle")
-      .dependingOn(helloExtensionV2Plugin);
+        new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
+            .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle")
+            .dependingOn(helloExtensionV2Plugin);
 
     DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
-      .dependingOn(helloExtensionV1Plugin)
-      .containing(applicationFileBuilder);
+        .dependingOn(helloExtensionV1Plugin)
+        .containing(applicationFileBuilder);
 
     addPackedDomainFromBuilder(domainFileBuilder);
 
@@ -2551,16 +2551,16 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
   public void appliesApplicationPolicyUsingDomainPlugin() throws Exception {
     installEchoService();
     installFooService();
-    
+
     policyManager.registerPolicyTemplate(policyIncludingPluginFileBuilder.getArtifactFile());
 
     ApplicationFileBuilder applicationFileBuilder =
-      new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
-        .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
+        new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
+            .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
 
     DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
-      .dependingOn(helloExtensionV1Plugin)
-      .containing(applicationFileBuilder);
+        .dependingOn(helloExtensionV1Plugin)
+        .containing(applicationFileBuilder);
 
     addPackedDomainFromBuilder(domainFileBuilder);
 
@@ -2583,12 +2583,12 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     policyManager.registerPolicyTemplate(policyIncludingPluginFileBuilder.getArtifactFile());
 
     ApplicationFileBuilder applicationFileBuilder =
-      new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
-        .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
+        new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
+            .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
 
     DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
-      .dependingOn(helloExtensionV1Plugin)
-      .containing(applicationFileBuilder);
+        .dependingOn(helloExtensionV1Plugin)
+        .containing(applicationFileBuilder);
 
     addPackedDomainFromBuilder(domainFileBuilder);
 
@@ -2611,12 +2611,12 @@ public class DeploymentServiceTestCase extends AbstractMuleTestCase {
     policyManager.registerPolicyTemplate(policyIncludingHelloPluginV2FileBuilder.getArtifactFile());
 
     ApplicationFileBuilder applicationFileBuilder =
-      new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
-        .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
+        new ApplicationFileBuilder("dummyWithHelloExtension").definedBy(APP_WITH_EXTENSION_PLUGIN_CONFIG)
+            .deployedWith(PROPERTY_DOMAIN, "dummy-domain-bundle");
 
     DomainFileBuilder domainFileBuilder = new DomainFileBuilder("dummy-domain-bundle")
-      .dependingOn(helloExtensionV1Plugin)
-      .containing(applicationFileBuilder);
+        .dependingOn(helloExtensionV1Plugin)
+        .containing(applicationFileBuilder);
 
     addPackedDomainFromBuilder(domainFileBuilder);
 
