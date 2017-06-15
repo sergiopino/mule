@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://example.com/example.json",
+  "properties": {
+    "dateSample": {
+      "type": "string",
+      "format":"date"
+    },
+    "datetimeSample": {
+      "type" : "string",
+      "format" : "date-time"
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "dateSample",
+    "datetimeSample"
+  ]
+}
