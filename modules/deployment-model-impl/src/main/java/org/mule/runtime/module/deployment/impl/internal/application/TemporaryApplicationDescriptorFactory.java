@@ -8,11 +8,8 @@
 package org.mule.runtime.module.deployment.impl.internal.application;
 
 import static org.mule.runtime.container.api.MuleFoldersUtil.CLASSES_FOLDER;
-import static org.mule.runtime.container.api.MuleFoldersUtil.LIB_FOLDER;
-import static org.mule.runtime.container.api.MuleFoldersUtil.SHARED_FOLDER;
 import org.mule.runtime.container.api.MuleFoldersUtil;
 import org.mule.runtime.deployment.model.api.application.ApplicationDescriptor;
-import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginRepository;
 import org.mule.runtime.module.deployment.impl.internal.artifact.DescriptorLoaderRepository;
 import org.mule.runtime.module.deployment.impl.internal.plugin.ArtifactPluginDescriptorLoader;
 
@@ -25,7 +22,6 @@ import java.io.File;
 public class TemporaryApplicationDescriptorFactory extends ApplicationDescriptorFactory {
 
   public TemporaryApplicationDescriptorFactory(ArtifactPluginDescriptorLoader artifactPluginDescriptorLoader,
-                                               ArtifactPluginRepository applicationPluginRepository,
                                                DescriptorLoaderRepository descriptorLoaderRepository) {
     super(artifactPluginDescriptorLoader, descriptorLoaderRepository);
   }
@@ -33,16 +29,6 @@ public class TemporaryApplicationDescriptorFactory extends ApplicationDescriptor
   @Override
   protected File getAppClassesFolder(ApplicationDescriptor descriptor) {
     return new File(getApplicationFolder(descriptor), CLASSES_FOLDER);
-  }
-
-  @Override
-  protected File getAppLibFolder(ApplicationDescriptor descriptor) {
-    return new File(getApplicationFolder(descriptor), LIB_FOLDER);
-  }
-
-  @Override
-  protected File getAppSharedLibsFolder(ApplicationDescriptor descriptor) {
-    return new File(new File(getApplicationFolder(descriptor), LIB_FOLDER), SHARED_FOLDER);
   }
 
   private File getApplicationFolder(ApplicationDescriptor descriptor) {

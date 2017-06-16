@@ -96,6 +96,10 @@ public class MuleFoldersUtil {
     return new File(getAppsFolder(), appName);
   }
 
+  public static File getAppTempFolder(String appName) {
+    return new File(new File(getExecutionFolder(), appName), "temp");
+  }
+
   public static File getAppClassesFolder(String appName) {
     return new File(getAppFolder(appName), CLASSES_FOLDER);
   }
@@ -106,21 +110,6 @@ public class MuleFoldersUtil {
    */
   public static File getAppLibFolder(String appName) {
     return new File(getAppFolder(appName), getAppLibsFolderPath());
-  }
-
-  /**
-   * @param appName name of the application to look for
-   * @return the plugins folder in the deployed application with the given name
-   */
-  public static File getAppPluginsFolder(String appName) {
-    return new File(getAppFolder(appName), getAppPluginsFolderPath());
-  }
-
-  /**
-   * @return relative path for plugins on an application
-   */
-  public static String getAppPluginsFolderPath() {
-    return PLUGINS_FOLDER + separator;
   }
 
   /**

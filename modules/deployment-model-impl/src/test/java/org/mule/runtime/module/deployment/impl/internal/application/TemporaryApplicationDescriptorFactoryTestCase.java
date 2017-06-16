@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 import org.mule.runtime.container.api.MuleFoldersUtil;
 import org.mule.runtime.core.registry.SpiServiceRegistry;
 import org.mule.runtime.deployment.model.api.application.ApplicationDescriptor;
-import org.mule.runtime.deployment.model.api.plugin.ArtifactPluginRepository;
 import org.mule.runtime.module.deployment.impl.internal.artifact.ServiceRegistryDescriptorLoaderRepository;
 import org.mule.runtime.module.deployment.impl.internal.plugin.ArtifactPluginDescriptorLoader;
 import org.mule.tck.junit4.AbstractMuleTestCase;
@@ -40,7 +39,6 @@ public class TemporaryApplicationDescriptorFactoryTestCase extends AbstractMuleT
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   private ArtifactPluginDescriptorLoader artifactPluginDescriptorLoader;
-  private ArtifactPluginRepository applicationPluginRepository;
   private TemporaryApplicationDescriptorFactory temporaryApplicationDescriptorFactory;
   private File rootArtifactFolder;
   private ApplicationDescriptor applicationDescriptor;
@@ -48,11 +46,8 @@ public class TemporaryApplicationDescriptorFactoryTestCase extends AbstractMuleT
   @Before
   public void before() throws IOException {
     this.artifactPluginDescriptorLoader = mock(ArtifactPluginDescriptorLoader.class);
-    this.applicationPluginRepository = mock(ArtifactPluginRepository.class);
-
     this.temporaryApplicationDescriptorFactory = new TemporaryApplicationDescriptorFactory(
                                                                                            artifactPluginDescriptorLoader,
-                                                                                           applicationPluginRepository,
                                                                                            new ServiceRegistryDescriptorLoaderRepository(new SpiServiceRegistry()));
 
     this.rootArtifactFolder = temporaryFolder.newFolder();
@@ -79,21 +74,4 @@ public class TemporaryApplicationDescriptorFactoryTestCase extends AbstractMuleT
   private void assertRelativeFolder(File folder, File standaloneAppClassFolder) {
     assertThat(standaloneAppClassFolder.toPath().endsWith(rootArtifactFolder.toPath().relativize(folder.toPath())), is(true));
   }
-
-  @Test
-  public void relativeAppLibFolder() throws Exception {
-    File folder = this.temporaryApplicationDescriptorFactory.getAppLibFolder(applicationDescriptor);
-    assertThat(folder.getParentFile().getParentFile(), equalTo(rootArtifactFolder));
-    File standaloneAppLibFolder = MuleFoldersUtil.getAppLibFolder(APP_NAME);
-    assertRelativeFolder(folder, standaloneAppLibFolder);
-  }
-
-  @Test
-  public void relativeAppSharedPluginLibsFolder() throws Exception {
-    File folder = this.temporaryApplicationDescriptorFactory.getAppSharedLibsFolder(applicationDescriptor);
-    assertThat(folder.getParentFile().getParentFile().getParentFile(), equalTo(rootArtifactFolder));
-    File standaloneAppSharedLibsFolder = MuleFoldersUtil.getAppSharedLibsFolder(APP_NAME);
-    assertRelativeFolder(folder, standaloneAppSharedLibsFolder);
-  }
-
 }

@@ -79,63 +79,9 @@ public class ApplicationDescriptorFactory
     return APP;
   }
 
-  //@Override
-  //protected ApplicationDescriptor loadFromJsonDescriptor(File artifactFolder, File artifactJsonDescriptor) {
-  //  final MuleApplicationModel muleApplicationModel = getArtifactJsonDescriber(artifactJsonDescriptor);
-  //
-  //  final ApplicationDescriptor descriptor = new ApplicationDescriptor(artifactFolder.getName());
-  //  descriptor.setArtifactLocation(artifactFolder);
-  //  descriptor.setRootFolder(artifactFolder);
-  //  descriptor.setBundleDescriptor(getBundleDescriptor(artifactFolder, muleApplicationModel));
-  //  descriptor.setMinMuleVersion(new MuleVersion(muleApplicationModel.getMinMuleVersion()));
-  //  descriptor.setRedeploymentEnabled(muleApplicationModel.isRedeploymentEnabled());
-  //  muleApplicationModel.getDomain().ifPresent(domain -> {
-  //    descriptor.setDomain(domain);
-  //  });
-  //  List<String> muleApplicationModelConfigs = muleApplicationModel.getConfigs();
-  //  if (muleApplicationModelConfigs != null && !muleApplicationModelConfigs.isEmpty()) {
-  //    descriptor.setConfigResources(muleApplicationModelConfigs.stream().map(configFile -> appendMuleFolder(configFile))
-  //        .collect(toList()));
-  //    List<File> configFiles = descriptor.getConfigResources()
-  //        .stream()
-  //        .map(config -> new File(artifactFolder, config)).collect(toList());
-  //    descriptor.setConfigResourcesFile(configFiles.toArray(new File[configFiles.size()]));
-  //    descriptor.setAbsoluteResourcePaths(configFiles.stream().map(configFile -> configFile.getAbsolutePath()).collect(toList())
-  //        .toArray(new String[configFiles.size()]));
-  //  } else {
-  //    File configFile = new File(artifactFolder, appendMuleFolder(DEFAULT_CONFIGURATION_RESOURCE));
-  //    descriptor.setConfigResourcesFile(new File[] {configFile});
-  //    descriptor.setConfigResources(ImmutableList.<String>builder().add(DEFAULT_CONFIGURATION_RESOURCE_LOCATION).build());
-  //    descriptor.setAbsoluteResourcePaths(new String[] {configFile.getAbsolutePath()});
-  //  }
-  //
-  //  muleApplicationModel.getClassLoaderModelLoaderDescriptor().ifPresent(classLoaderModelLoaderDescriptor -> {
-  //    ClassLoaderModel classLoaderModel = getClassLoaderModel(artifactFolder, classLoaderModelLoaderDescriptor);
-  //    descriptor.setClassLoaderModel(classLoaderModel);
-  //
-  //    try {
-  //      descriptor.setPlugins(createArtifactPluginDescriptors(classLoaderModel));
-  //    } catch (IOException e) {
-  //      throw new IllegalStateException(e);
-  //    }
-  //  });
-  //  File appClassesFolder = getAppClassesFolder(descriptor);
-  //  // get a ref to an optional app props file (right next to the descriptor)
-  //  setApplicationProperties(descriptor, new File(appClassesFolder, DEFAULT_ARTIFACT_PROPERTIES_RESOURCE));
-  //  return descriptor;
-  //}
-
   @Override
   protected MuleApplicationModel deserializeArtifactModel(InputStream stream) throws IOException {
     return new MuleApplicationModelJsonSerializer().deserialize(IOUtils.toString(stream));
-  }
-
-  protected File getAppLibFolder(ApplicationDescriptor descriptor) {
-    return MuleFoldersUtil.getAppLibFolder(descriptor.getName());
-  }
-
-  protected File getAppSharedLibsFolder(ApplicationDescriptor descriptor) {
-    return MuleFoldersUtil.getAppSharedLibsFolder(descriptor.getName());
   }
 
   protected File getAppClassesFolder(ApplicationDescriptor descriptor) {
