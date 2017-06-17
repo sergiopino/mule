@@ -137,7 +137,7 @@
 /mule-standalone-${productVersion}/lib/mule/mule-module-extensions-support-${productVersion}.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-extensions-soap-support-${productVersion}.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-extensions-xml-support-${productVersion}.jar
-/mule-standalone-${productVersion}/lib/mule/mule-module-global-config-4.0.0-SNAPSHOT.jar
+/mule-standalone-${productVersion}/lib/mule/mule-module-global-config-${productVersion}.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-launcher-${productVersion}.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-logging-${productVersion}.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-deployment-${productVersion}.jar
@@ -162,10 +162,10 @@
 # /services
 #
 /mule-standalone-${productVersion}/services
-/mule-standalone-${productVersion}/services/mule-service-scheduler-1.0.0-+
-/mule-standalone-${productVersion}/services/mule-service-http-1.0.0-+
-/mule-standalone-${productVersion}/services/mule-service-oauth-1.0.0-+
-/mule-standalone-${productVersion}/services/mule-service-soap-1.0.0-+
+/mule-standalone-${productVersion}/services/mule-service-scheduler-1.0.0-SNAPSHOT.zip
+/mule-standalone-${productVersion}/services/mule-service-http-1.0.0-SNAPSHOT.zip
+/mule-standalone-${productVersion}/services/mule-service-oauth-1.0.0-SNAPSHOT.zip
+/mule-standalone-${productVersion}/services/mule-service-soap-1.0.0-SNAPSHOT.zip
 /mule-standalone-${productVersion}/services/mule-service-weave-4.0.0-+
 #
 # /lib/opt
