@@ -19,6 +19,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
+import static reactor.core.publisher.Mono.from;
+import static reactor.core.publisher.Mono.just;
+
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.message.Message;
 import org.mule.runtime.core.DefaultEventContext;
@@ -34,6 +37,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import reactor.core.publisher.Mono;
 
 //TODO MULE-10927 - create a common class between CompositeOperationPolicyTestCase and CompositeSourcePolicyTestCase
 public class CompositeOperationPolicyTestCase extends AbstractMuleTestCase {
@@ -66,7 +70,7 @@ public class CompositeOperationPolicyTestCase extends AbstractMuleTestCase {
     secondPolicyResultProcessorEvent = createTestEvent();
     nextProcessResultEvent = createTestEvent();
     when(operationPolicyParametersTransformer.get().fromParametersToMessage(any())).thenReturn(Message.of(null));
-    when(operationExecutionFunction.execute(any(), any())).thenReturn(nextProcessResultEvent);
+    when(operationExecutionFunction.execute(any(), any())).thenReturn(just(nextProcessResultEvent));
     when(firstPolicy.getPolicyChain().process(any())).thenReturn(firstPolicyProcessorResultEvent);
     when(secondPolicy.getPolicyChain().process(any())).thenReturn(secondPolicyResultProcessorEvent);
     when(operationPolicyProcessorFactory.createOperationPolicy(same(secondPolicy), any()))
@@ -93,7 +97,7 @@ public class CompositeOperationPolicyTestCase extends AbstractMuleTestCase {
                                                             operationPolicyParametersTransformer, operationPolicyProcessorFactory,
                                                             operationParametersProcessor, operationExecutionFunction);
 
-    Event result = compositeOperationPolicy.process(initialEvent);
+    Event result = from(compositeOperationPolicy.process(initialEvent)).block();
     assertThat(result, is(nextProcessResultEvent));
     verify(operationExecutionFunction).execute(any(), same(initialEvent));
     verify(operationPolicyProcessorFactory).createOperationPolicy(same(firstPolicy), any());
@@ -106,7 +110,7 @@ public class CompositeOperationPolicyTestCase extends AbstractMuleTestCase {
                                                             operationPolicyParametersTransformer, operationPolicyProcessorFactory,
                                                             operationParametersProcessor, operationExecutionFunction);
 
-    Event result = compositeOperationPolicy.process(initialEvent);
+    Event result = from(compositeOperationPolicy.process(initialEvent)).block();
     assertThat(result, is(nextProcessResultEvent));
     verify(operationExecutionFunction).execute(any(), same(initialEvent));
     verify(operationPolicyProcessorFactory).createOperationPolicy(same(firstPolicy), any());

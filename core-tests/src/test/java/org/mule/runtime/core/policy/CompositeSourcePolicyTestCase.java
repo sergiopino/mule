@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
+import static reactor.core.publisher.Mono.from;
 
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.message.Message;
@@ -36,6 +37,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import reactor.core.publisher.Mono;
 
 //TODO MULE-10927 - create a common class between CompositeOperationPolicyTestCase and CompositeSourcePolicyTestCase
 public class CompositeSourcePolicyTestCase extends AbstractMuleTestCase {
@@ -97,7 +99,8 @@ public class CompositeSourcePolicyTestCase extends AbstractMuleTestCase {
                                                       sourcePolicyParametersTransformer, sourcePolicyProcessorFactory,
                                                       flowExecutionProcessor, sourceParametersTransformer);
 
-    Either<FailureSourcePolicyResult, SuccessSourcePolicyResult> sourcePolicyResult = compositeSourcePolicy.process(initialEvent);
+    Either<FailureSourcePolicyResult, SuccessSourcePolicyResult> sourcePolicyResult =
+        from(compositeSourcePolicy.process(initialEvent)).block();
     assertThat(sourcePolicyResult.isRight(), is(true));
     assertThat(sourcePolicyResult.getRight().getFlowExecutionResult(), is(firstPolicyResultEvent));
     verify(flowExecutionProcessor).process(modifiedEvent);
@@ -111,7 +114,8 @@ public class CompositeSourcePolicyTestCase extends AbstractMuleTestCase {
         new CompositeSourcePolicy(asList(firstPolicy, secondPolicy), sourcePolicyParametersTransformer,
                                   sourcePolicyProcessorFactory, flowExecutionProcessor, sourceParametersTransformer);
 
-    Either<FailureSourcePolicyResult, SuccessSourcePolicyResult> sourcePolicyResult = compositeSourcePolicy.process(initialEvent);
+    Either<FailureSourcePolicyResult, SuccessSourcePolicyResult> sourcePolicyResult =
+        from(compositeSourcePolicy.process(initialEvent)).block();
     assertThat(sourcePolicyResult.isRight(), is(true));
     assertThat(sourcePolicyResult.getRight().getFlowExecutionResult(), is(firstPolicyResultEvent));
     verify(flowExecutionProcessor).process(modifiedEvent);

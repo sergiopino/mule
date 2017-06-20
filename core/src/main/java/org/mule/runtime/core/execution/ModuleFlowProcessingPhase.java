@@ -207,7 +207,7 @@ public class ModuleFlowProcessingPhase
                                                    .subscribe();
           };
 
-          policy.process(templateEvent).apply(onFailureFunction, onSuccessFunction);
+          from(policy.process(templateEvent)).doOnNext(either -> either.apply(onFailureFunction, onSuccessFunction));
         } finally {
           policyManager.disposePoliciesResources(templateEvent.getContext().getId());
         }
@@ -417,9 +417,9 @@ public class ModuleFlowProcessingPhase
    * This method will not throw any {@link Exception}.
    *
    * @param terminateConsumer the action to perform on the transformed result.
-   * @param result            the outcome of trying to send the response of the source through the source. In the case of error, only
-   *                          {@link MessagingException} or {@link SourceErrorException} are valid values on the {@code left} side of this
-   *                          parameter.
+   * @param result the outcome of trying to send the response of the source through the source. In the case of error, only
+   *        {@link MessagingException} or {@link SourceErrorException} are valid values on the {@code left} side of this
+   *        parameter.
    */
   private void onTerminate(Consumer<Either<MessagingException, Event>> terminateConsumer, Either<Throwable, Event> result) {
     safely(() -> terminateConsumer.accept(result.mapLeft(throwable -> {

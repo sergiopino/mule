@@ -148,7 +148,7 @@ public class OperationMessageProcessor extends ExtensionComponent<OperationModel
   @Override
   public Publisher<Event> apply(Publisher<Event> publisher) {
     if (operationModel.isBlocking()) {
-      return from(publisher).map(checkedFunction(event -> withContextClassLoader(classLoader, () -> {
+      return from(publisher).flatMap(checkedFunction(event -> withContextClassLoader(classLoader, () -> {
         Optional<ConfigurationInstance> configuration;
         OperationExecutionFunction operationExecutionFunction;
 
@@ -157,7 +157,7 @@ public class OperationMessageProcessor extends ExtensionComponent<OperationModel
           ExecutionContextAdapter<OperationModel> operationContext = getPrecalculatedContext(event);
           configuration = operationContext.getConfiguration();
 
-          operationExecutionFunction = (parameters, operationEvent) -> doProcess(operationEvent, operationContext).block();
+          operationExecutionFunction = (parameters, operationEvent) -> doProcess(operationEvent, operationContext);
         } else {
           // Otherwise, generate the context as usual.
           configuration = getConfiguration(event);
@@ -165,8 +165,15 @@ public class OperationMessageProcessor extends ExtensionComponent<OperationModel
           operationExecutionFunction =
               (parameters,
                operationEvent) -> {
-                final ExecutionContextAdapter<OperationModel> operationContext =
-                    createExecutionContext(configuration, parameters, operationEvent);
+                final ExecutionContextAdapter<OperationModel> operationContext;
+                try
+                {
+                  operationContext = createExecutionContext(configuration, parameters, operationEvent);
+                }
+                catch (MuleException e)
+                {
+                  e.printStackTrace();
+                }
                 return doProcess(operationEvent, operationContext)
                     .block();
               };

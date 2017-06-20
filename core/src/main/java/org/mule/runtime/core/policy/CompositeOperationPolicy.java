@@ -6,6 +6,7 @@
  */
 package org.mule.runtime.core.policy;
 
+import static org.mule.runtime.core.api.processor.MessageProcessors.processToApply;
 import static org.mule.runtime.core.api.rx.Exceptions.rxExceptionToMuleException;
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.from;
@@ -16,6 +17,7 @@ import org.mule.runtime.api.message.Message;
 import org.mule.runtime.core.api.DefaultMuleException;
 import org.mule.runtime.core.api.Event;
 import org.mule.runtime.core.api.policy.OperationPolicyParametersTransformer;
+import org.mule.runtime.core.api.processor.MessageProcessors;
 import org.mule.runtime.core.api.processor.Processor;
 import org.mule.runtime.core.api.rx.Exceptions;
 
@@ -66,30 +68,24 @@ public class CompositeOperationPolicy extends
 
       @Override
       public Event process(Event event) throws MuleException {
-        try {
+        return processToApply(event, this);
+      }
+
+      @Override
+      public Publisher<Event> apply(Publisher<Event> publisher) {
+        return from(publisher).flatMap(event -> {
           Map<String, Object> parametersMap = new HashMap<>();
-          parametersMap.putAll(operationParametersProcessor.getOperationParameters());
+          try {
+            parametersMap.putAll(operationParametersProcessor.getOperationParameters());
+          } catch (Exception e) {
+            return error(e);
+          }
           if (operationPolicyParametersTransformer.isPresent()) {
             parametersMap
                 .putAll(operationPolicyParametersTransformer.get().fromMessageToParameters(event.getMessage()));
           }
-          return from(operationExecutionFunction.execute(parametersMap, event)).block();
-        } catch (Throwable e) {
-          throw rxExceptionToMuleException(e);
-        }
-      }
-
-      @Override
-      public Publisher<Event> apply(Publisher<Event> publisher)
-      {
-        try {
-          Message message = getParametersTransformer().isPresent()
-                            ? getParametersTransformer().get().fromParametersToMessage(getParametersProcessor().getOperationParameters())
-                            : operationEvent.getMessage();
-          return processPolicies(Event.builder(operationEvent).message(message).build());
-        } catch (Exception e) {
-          return error(e);
-        }
+          return operationExecutionFunction.execute(parametersMap, event);
+        });
       }
     };
     this.operationPolicyProcessorFactory = operationPolicyProcessorFactory;
