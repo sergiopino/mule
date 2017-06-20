@@ -10,6 +10,7 @@ import static java.util.Collections.emptyList;
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
 import static org.mule.runtime.api.message.Message.of;
 import static org.mule.runtime.core.api.functional.Either.right;
+import static reactor.core.publisher.Mono.just;
 
 import org.mule.runtime.api.component.ComponentIdentifier;
 import org.mule.runtime.api.component.location.ComponentLocation;
@@ -37,6 +38,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import reactor.core.publisher.Mono;
 
 /**
  * Default implementation of {@link PolicyManager}.
@@ -66,28 +69,21 @@ public class DefaultPolicyManager implements PolicyManager, Initialisable {
     PolicyPointcutParameters sourcePointcutParameters = createSourcePointcutParameters(sourceLocation, sourceEvent);
     List<Policy> parameterizedPolicies = policyProvider.findSourceParameterizedPolicies(sourcePointcutParameters);
     if (parameterizedPolicies.isEmpty()) {
-      return event -> {
-        try {
-          Event flowExecutionResult = flowExecutionProcessor.process(sourceEvent);
-
-          // TODO MULE-11141 - This is the case of a filtered flow. This will eventually go away.
-          if (flowExecutionResult == null) {
-            flowExecutionResult = Event.builder(sourceEvent).message(of(null)).build();
-          }
-
-          return right(new SuccessSourcePolicyResult(flowExecutionResult,
-                                                     messageSourceResponseParametersProcessor
-                                                         .getSuccessfulExecutionResponseParametersFunction()
-                                                         .apply(flowExecutionResult),
-                                                     messageSourceResponseParametersProcessor));
-        } catch (Exception e) {
-          MessagingException messagingException =
-              e instanceof MessagingException ? (MessagingException) e : new MessagingException(event, e, flowExecutionProcessor);
-          return Either.left(new FailureSourcePolicyResult(messagingException, messageSourceResponseParametersProcessor
-              .getFailedExecutionResponseParametersFunction()
-              .apply(messagingException.getEvent())));
-        }
-      };
+      return event -> just(sourceEvent).transform(flowExecutionProcessor)
+          .defaultIfEmpty(Event.builder(sourceEvent).message(of(null)).build())
+          .<Either<FailureSourcePolicyResult, SuccessSourcePolicyResult>>map(flowExecutionResult -> right(new SuccessSourcePolicyResult(flowExecutionResult,
+                                                                                                                                        messageSourceResponseParametersProcessor
+                                                                                                                                            .getSuccessfulExecutionResponseParametersFunction()
+                                                                                                                                            .apply(flowExecutionResult),
+                                                                                                                                        messageSourceResponseParametersProcessor)))
+          .onErrorResume(Exception.class, e -> {
+            MessagingException messagingException =
+                e instanceof MessagingException ? (MessagingException) e
+                    : new MessagingException(event, e, flowExecutionProcessor);
+            return just(Either.left(new FailureSourcePolicyResult(messagingException, messageSourceResponseParametersProcessor
+                .getFailedExecutionResponseParametersFunction()
+                .apply(messagingException.getEvent()))));
+          });
     }
     return new CompositeSourcePolicy(parameterizedPolicies,
                                      lookupSourceParametersTransformer(sourceLocation.getComponentIdentifier().getIdentifier()),
