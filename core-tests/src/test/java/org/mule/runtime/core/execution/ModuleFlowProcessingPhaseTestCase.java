@@ -30,7 +30,6 @@ import static org.mule.runtime.core.exception.Errors.ComponentIdentifiers.SOURCE
 import static org.mule.runtime.core.exception.Errors.ComponentIdentifiers.SOURCE_ERROR_RESPONSE_SEND;
 import static org.mule.runtime.core.exception.Errors.ComponentIdentifiers.SOURCE_RESPONSE_GENERATE;
 import static org.mule.runtime.core.exception.Errors.ComponentIdentifiers.SOURCE_RESPONSE_SEND;
-import static org.mule.runtime.core.execution.ModuleFlowProcessingPhase.ENABLE_SOURCE_POLICIES_SYSTEM_PROPERTY;
 import static org.mule.runtime.dsl.api.component.config.DefaultComponentLocation.fromSingleComponent;
 import static org.mule.tck.junit4.matcher.EitherMatcher.leftMatches;
 import static org.mule.tck.junit4.matcher.EitherMatcher.rightMatches;
@@ -59,32 +58,22 @@ import org.mule.runtime.core.policy.SourcePolicy;
 import org.mule.runtime.core.policy.SuccessSourcePolicyResult;
 import org.mule.tck.junit4.AbstractMuleTestCase;
 import org.mule.tck.junit4.matcher.EventMatcher;
-import org.mule.tck.junit4.rule.SystemProperty;
 import org.mule.tck.size.SmallTest;
 
 import java.util.Collection;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoSink;
 
-@RunWith(Parameterized.class)
 @SmallTest
 public class ModuleFlowProcessingPhaseTestCase extends AbstractMuleTestCase {
 
   private static final ErrorType ERROR_FROM_FLOW =
       ErrorTypeBuilder.builder().parentErrorType(mock(ErrorType.class)).namespace("TEST").identifier("FLOW_FAILED").build();
-
-  private boolean enableSourcePolicies;
-
-  @Rule
-  public SystemProperty enableSourcePoliciesSystemProperty;
 
   private MuleContext muleContext;
   private FlowConstruct flow;
@@ -95,16 +84,6 @@ public class ModuleFlowProcessingPhaseTestCase extends AbstractMuleTestCase {
   private SourcePolicy sourcePolicy;
 
   private ModuleFlowProcessingPhase moduleFlowProcessingPhase;
-
-  // TODO MULE-11167 Remove this parameterization once policies sources are non-blocking
-  public ModuleFlowProcessingPhaseTestCase(boolean enableSourcePolicies) {
-    this.enableSourcePolicies = enableSourcePolicies;
-    if (enableSourcePolicies) {
-      this.enableSourcePoliciesSystemProperty = new SystemProperty(ENABLE_SOURCE_POLICIES_SYSTEM_PROPERTY, "true");
-    } else {
-      this.enableSourcePoliciesSystemProperty = new SystemProperty(ENABLE_SOURCE_POLICIES_SYSTEM_PROPERTY, null);
-    }
-  }
 
   @Parameters
   public static Collection<Object> data() {
@@ -176,7 +155,6 @@ public class ModuleFlowProcessingPhaseTestCase extends AbstractMuleTestCase {
 
   @Test
   public void successWithAsyncResponse() throws Exception {
-    assumeThat(enableSourcePolicies, is(false));
     Reference<MonoSink> sinkReference = new Reference<>();
     reset(template);
     when(template.sendResponseToClient(any(), any(), any(), any())).thenAnswer(invocation -> {
@@ -257,7 +235,6 @@ public class ModuleFlowProcessingPhaseTestCase extends AbstractMuleTestCase {
 
   @Test
   public void flowErrorWithAsyncResponse() throws Exception {
-    assumeThat(enableSourcePolicies, is(false));
     Reference<MonoSink> sinkReference = new Reference<>();
     Reference<Exception> exception = new Reference<>();
 
@@ -384,12 +361,7 @@ public class ModuleFlowProcessingPhaseTestCase extends AbstractMuleTestCase {
   }
 
   private void verifyFlowErrorHandler(final EventMatcher errorHandlerEventMatcher) {
-    if (enableSourcePolicies) {
-      // TODO MULE-11167 policy failures do not call the error handler?
-      verify(flow.getExceptionListener(), never()).handleException(any(), any());
-    } else {
-      verify(flow.getExceptionListener()).handleException(any(), argThat(errorHandlerEventMatcher));
-    }
+    verify(flow.getExceptionListener(), never()).handleException(any(), any());
   }
 
   private EventMatcher isErrorTypeSourceResponseGenerate() {

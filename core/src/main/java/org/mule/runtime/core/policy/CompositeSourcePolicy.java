@@ -127,7 +127,7 @@ public class CompositeSourcePolicy extends
    * @throws Exception if there was an unexpected failure thrown by executing the chain.
    */
   @Override
-  public Publisher<Either<FailureSourcePolicyResult, SuccessSourcePolicyResult>> process(Event sourceEvent) throws Exception {
+  public Publisher<Either<FailureSourcePolicyResult, SuccessSourcePolicyResult>> process(Event sourceEvent) {
     return from(processPolicies(sourceEvent))
         .<Either<FailureSourcePolicyResult, SuccessSourcePolicyResult>>map(policiesResultEvent -> {
           Map<String, Object> responseParameters =
