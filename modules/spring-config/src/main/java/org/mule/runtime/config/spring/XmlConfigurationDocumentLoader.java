@@ -128,7 +128,7 @@ public class XmlConfigurationDocumentLoader {
                         new ModuleDelegatingEntityResolver(extensions), errorHandler,
                         validationMode, true);
     } catch (Exception e) {
-      throw new MuleRuntimeException(e);
+      throw new MuleRuntimeException(createStaticMessage("Error loading %s",filename),e);
     }
     if (validationMode == VALIDATION_XSD) {
       throwExceptionIfErrorsWereFound(errorHandler, filename);
