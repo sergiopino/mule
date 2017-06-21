@@ -7,7 +7,6 @@
 package org.mule.runtime.soap.api.message.dispatcher;
 
 
-import org.apache.log4j.Logger;
 import org.mule.runtime.api.lifecycle.InitialisationException;
 import org.mule.runtime.extension.api.soap.message.DispatchingRequest;
 import org.mule.runtime.extension.api.soap.message.DispatchingResponse;

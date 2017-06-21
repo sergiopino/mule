@@ -223,7 +223,7 @@ public class MuleArtifactContext extends AbstractXmlApplicationContext {
   private void createApplicationModel() {
     try {
       ArtifactConfig.Builder applicationConfigBuilder = new ArtifactConfig.Builder();
-      applicationConfigBuilder.setApplicationProperties(this.artifactProperties);
+      applicationConfigBuilder.setArtifactProperties(this.artifactProperties);
       for (Resource springResource : artifactConfigResources) {
         Document document =
             xmlConfigurationDocumentLoader.loadDocument(muleContext.getExtensionManager() == null ? emptySet()

@@ -415,6 +415,9 @@ public class ApplicationModel {
     // TODO MULE-9825: a new mechanism for property placeholders need to be defined
     final List<String> locations = new ArrayList<>();
     final Map<String, String> globalProperties = new HashMap<>();
+
+
+
     artifactConfig.getConfigFiles().stream().forEach(configFile -> {
       configFile.getConfigLines().get(0).getChildren().stream().forEach(configLine -> {
         if (GLOBAL_PROPERTY.equals(configLine.getIdentifier())) {
@@ -447,7 +450,7 @@ public class ApplicationModel {
         throw new MuleRuntimeException(e);
       }
     }
-    Map<String, String> applicationProperties = artifactConfig.getApplicationProperties();
+    Map<String, String> applicationProperties = artifactConfig.getArtifactProperties();
     artifactProperties = new DefaultArtifactProperties(ImmutableMap.builder().putAll(globalProperties).build(), springProperties
         .build(), applicationProperties != null ? ImmutableMap.builder().putAll(applicationProperties).build() : emptyMap());
   }
