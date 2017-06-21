@@ -126,11 +126,11 @@
 /mule-standalone-${productVersion}/lib/mule/mule-extensions-api-persistence-1.0.0-BETA-TEST-PEPE.jar
 /mule-standalone-${productVersion}/lib/mule/mule-extensions-api-dsql-1.0.0-BETA-TEST-PEPE.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-artifact-${productVersion}.jar
-/mule-standalone-${productVersion}/lib/mule/mule-metadata-model-api-1.0.0-SNAPSHOT.jar
-/mule-standalone-${productVersion}/lib/mule/mule-metadata-model-java-1.0.0-SNAPSHOT.jar
-/mule-standalone-${productVersion}/lib/mule/mule-metadata-model-xml-1.0.0-SNAPSHOT.jar
-/mule-standalone-${productVersion}/lib/mule/mule-metadata-model-json-1.0.0-SNAPSHOT.jar
-/mule-standalone-${productVersion}/lib/mule/mule-metadata-model-persistence-1.0.0-SNAPSHOT.jar
+/mule-standalone-${productVersion}/lib/mule/mule-metadata-model-api-1.0.0-BETA-TEST-PEPE.jar
+/mule-standalone-${productVersion}/lib/mule/mule-metadata-model-java-1.0.0-BETA-TEST-PEPE.jar
+/mule-standalone-${productVersion}/lib/mule/mule-metadata-model-xml-1.0.0-BETA-TEST-PEPE.jar
+/mule-standalone-${productVersion}/lib/mule/mule-metadata-model-json-1.0.0-BETA-TEST-PEPE.jar
+/mule-standalone-${productVersion}/lib/mule/mule-metadata-model-persistence-1.0.0-BETA-TEST-PEPE.jar
 /mule-standalone-${productVersion}/lib/mule/mule-message-metadata-model-1.0.0-SNAPSHOT.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-builders-${productVersion}.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-extensions-spring-support-${productVersion}.jar
@@ -143,7 +143,7 @@
 /mule-standalone-${productVersion}/lib/mule/mule-module-deployment-${productVersion}.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-deployment-model-${productVersion}.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-deployment-model-impl-${productVersion}.jar
-/mule-standalone-${productVersion}/lib/mule/mule-module-dsl-api-1.0.0-SNAPSHOT.jar
+/mule-standalone-${productVersion}/lib/mule/mule-module-dsl-api-1.0.0-BETA-TEST-PEPE.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-http-policy-api-1.0.0-SNAPSHOT.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-service-${productVersion}.jar
 /mule-standalone-${productVersion}/lib/mule/mule-module-container-${productVersion}.jar
