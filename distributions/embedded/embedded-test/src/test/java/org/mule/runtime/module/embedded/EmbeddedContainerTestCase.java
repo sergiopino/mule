@@ -38,6 +38,8 @@ import org.mule.runtime.module.embedded.api.EmbeddedContainer;
 import org.mule.runtime.module.embedded.internal.classloading.FilteringClassLoader;
 import org.mule.runtime.module.embedded.internal.classloading.JdkOnlyClassLoaderFactory;
 import org.mule.tck.junit4.AbstractMuleTestCase;
+import org.mule.tck.junit4.FlakinessDetectorTestRunner;
+import org.mule.tck.junit4.FlakyTest;
 import org.mule.tck.junit4.rule.FreePortFinder;
 
 import com.mashape.unirest.http.HttpResponse;
@@ -52,6 +54,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import net.lingala.zip4j.core.ZipFile;
@@ -60,6 +63,7 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import ru.yandex.qatools.allure.annotations.Description;
 import ru.yandex.qatools.allure.annotations.Features;
@@ -67,6 +71,7 @@ import ru.yandex.qatools.allure.annotations.Stories;
 
 @Features({EMBEDDED_API, DEPLOYMENT_TYPE})
 @Stories({CONFIGURATION, EMBEDDED})
+//@RunWith(FlakinessDetectorTestRunner.class)
 public class EmbeddedContainerTestCase extends AbstractMuleTestCase {
 
   private static final String LOGGING_FILE = "app.log";
@@ -79,7 +84,165 @@ public class EmbeddedContainerTestCase extends AbstractMuleTestCase {
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+
+
+  @Test
+  public void leakTestCaseWithHttpWithoutNewSystemProperties() throws IOException, URISyntaxException, InterruptedException{
+    File applicationFolder = getFolderForApplication("http-echo");
+    ClassLoader contextClassLoader = currentThread().getContextClassLoader();
+    Consumer<Integer> portConsumer = port -> { port++;};
+    try
+    {
+      // Sets a classloader with the JDK only to ensure that dependencies are read form the embedded container classloader
+      FilteringClassLoader jdkOnlyClassLoader = JdkOnlyClassLoaderFactory.create();
+      currentThread().setContextClassLoader(jdkOnlyClassLoader);
+
+      Map<String, String> customizedApplicationProperties = new HashMap<>(emptyMap());
+      Integer httpListenerPort = new FreePortFinder(6000, 9000).find();
+      customizedApplicationProperties.put("httpPort", valueOf(httpListenerPort));
+
+      File localRepositoryLocation = localRepositoryFolder.getRoot();
+      LOGGER.info("Using folder as local repository: " + localRepositoryLocation.getAbsolutePath());
+
+      EmbeddedContainer embeddedContainer = builder()
+              .withMuleVersion(System.getProperty("mule.version"))
+              .withContainerBaseFolder(containerFolder.newFolder().toURI().toURL())
+              .withMavenConfiguration(newMavenConfigurationBuilder()
+                                              .withLocalMavenRepositoryLocation(localRepositoryLocation)
+                                              .withRemoteRepository(newRemoteRepositoryBuilder().withId("mulesoft-public")
+                                                                            .withUrl(new URL("https://repository.mulesoft.org/nexus/content/repositories/public"))
+                                                                            .build())
+                                              .build())
+              .withLog4jConfigurationFile(getClass().getClassLoader().getResource("log4j2-default.xml").toURI())
+              .withApplicationConfiguration(ApplicationConfiguration.builder()
+                                                    .withApplicationLocation(applicationFolder)
+                                                    .withDeploymentConfiguration(DeploymentConfiguration.builder()
+                                                                                         .withTestDependenciesEnabled(false)
+                                                                                         .withArtifactProperties(customizedApplicationProperties)
+                                                                                         .build())
+                                                    .build())
+              .build();
+
+      for (int i = 0; i < 10; i++)
+      {
+        embeddedContainer.start();
+        embeddedContainer.stop();
+        System.gc();
+        TimeUnit.SECONDS.sleep(1);
+      }
+    } catch (Exception e) {
+      System.out.print("EXCEPTION");
+    }
+    TimeUnit.SECONDS.sleep(60);
+  }
+
+  @Test
+  public void leakTestCaseWithHttpWithNewSystemProperties() throws IOException, URISyntaxException, InterruptedException{
+    System.setProperty("org.glassfish.grizzly.DEFAULT_MEMORY_MANAGER",
+                                  "org.glassfish.grizzly.memory.HeapMemoryManager");
+    File applicationFolder = getFolderForApplication("http-echo");
+    ClassLoader contextClassLoader = currentThread().getContextClassLoader();
+    Consumer<Integer> portConsumer = port -> { port++;};
+    try
+    {
+      // Sets a classloader with the JDK only to ensure that dependencies are read form the embedded container classloader
+      FilteringClassLoader jdkOnlyClassLoader = JdkOnlyClassLoaderFactory.create();
+      currentThread().setContextClassLoader(jdkOnlyClassLoader);
+
+      Map<String, String> customizedApplicationProperties = new HashMap<>(emptyMap());
+      Integer httpListenerPort = new FreePortFinder(6000, 9000).find();
+      customizedApplicationProperties.put("httpPort", valueOf(httpListenerPort));
+
+      File localRepositoryLocation = localRepositoryFolder.getRoot();
+      LOGGER.info("Using folder as local repository: " + localRepositoryLocation.getAbsolutePath());
+
+      EmbeddedContainer embeddedContainer = builder()
+              .withMuleVersion(System.getProperty("mule.version"))
+              .withContainerBaseFolder(containerFolder.newFolder().toURI().toURL())
+              .withMavenConfiguration(newMavenConfigurationBuilder()
+                                              .withLocalMavenRepositoryLocation(localRepositoryLocation)
+                                              .withRemoteRepository(newRemoteRepositoryBuilder().withId("mulesoft-public")
+                                                                            .withUrl(new URL("https://repository.mulesoft.org/nexus/content/repositories/public"))
+                                                                            .build())
+                                              .build())
+              .withLog4jConfigurationFile(getClass().getClassLoader().getResource("log4j2-default.xml").toURI())
+              .withApplicationConfiguration(ApplicationConfiguration.builder()
+                                                    .withApplicationLocation(applicationFolder)
+                                                    .withDeploymentConfiguration(DeploymentConfiguration.builder()
+                                                                                         .withTestDependenciesEnabled(false)
+                                                                                         .withArtifactProperties(customizedApplicationProperties)
+                                                                                         .build())
+                                                    .build())
+              .build();
+
+      for (int i = 0; i < 10; i++)
+      {
+        embeddedContainer.start();
+        embeddedContainer.stop();
+        System.gc();
+        TimeUnit.SECONDS.sleep(1);
+      }
+    } catch (Exception e) {
+      System.out.print("EXCEPTION");
+    }
+    System.out.print("EXCEPTION##############");
+    TimeUnit.SECONDS.sleep(60);
+  }
+
+  @Test
+  public void leakTestCaseWithoutHttp() throws IOException, URISyntaxException, InterruptedException{
+
+
+    File applicationFolder = getFolderForApplication("simple-app");
+    ClassLoader contextClassLoader = currentThread().getContextClassLoader();
+    try
+    {
+      // Sets a classloader with the JDK only to ensure that dependencies are read form the embedded container classloader
+      FilteringClassLoader jdkOnlyClassLoader = JdkOnlyClassLoaderFactory.create();
+      currentThread().setContextClassLoader(jdkOnlyClassLoader);
+
+      Map<String, String> customizedApplicationProperties = new HashMap<>(emptyMap());
+
+      File localRepositoryLocation = localRepositoryFolder.getRoot();
+      LOGGER.info("Using folder as local repository: " + localRepositoryLocation.getAbsolutePath());
+
+      EmbeddedContainer embeddedContainer = builder()
+              .withMuleVersion(System.getProperty("mule.version"))
+              .withContainerBaseFolder(containerFolder.newFolder().toURI().toURL())
+              .withMavenConfiguration(newMavenConfigurationBuilder()
+                                              .withLocalMavenRepositoryLocation(localRepositoryLocation)
+                                              .withRemoteRepository(newRemoteRepositoryBuilder().withId("mulesoft-public")
+                                                                            .withUrl(new URL("https://repository.mulesoft.org/nexus/content/repositories/public"))
+                                                                            .build())
+                                              .build())
+              .withLog4jConfigurationFile(getClass().getClassLoader().getResource("log4j2-default.xml").toURI())
+              .withApplicationConfiguration(ApplicationConfiguration.builder()
+                                                    .withApplicationLocation(applicationFolder)
+                                                    .withDeploymentConfiguration(DeploymentConfiguration.builder()
+                                                                                         .withTestDependenciesEnabled(false)
+                                                                                         .withArtifactProperties(customizedApplicationProperties)
+                                                                                         .build())
+                                                    .build())
+              .build();
+
+      for (int i = 0; i < 10; i++)
+      {
+        embeddedContainer.start();
+        embeddedContainer.stop();
+        System.gc();
+        TimeUnit.SECONDS.sleep(1);
+      }
+    } catch (Exception e) {
+      System.out.print("EXCEPTION");
+    }
+    System.out.print("EXCEPTION##############");
+    TimeUnit.SECONDS.sleep(60);
+  }
+
+
+
   @Description("Embedded runs an application depending on a connector")
+  //@FlakyTest(times = 20)
   @Test
   public void applicationWithConnector() throws Exception {
     doWithinApplication(getFolderForApplication("http-echo"), port -> {
