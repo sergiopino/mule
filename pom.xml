@@ -225,7 +225,7 @@
         <muleExtensionsApiVersion>1.0.0-BETA-TEST-RELEASE</muleExtensionsApiVersion>
         <muleExtensionsSoapApiVersion>1.0.0-BETA-SNAPSHOT</muleExtensionsSoapApiVersion>
         <muleHttpPolicyApiVersion>1.0.0-BETA-TEST-RELEASE</muleHttpPolicyApiVersion>
-        <muleMavenClientApi>1.0.0-BETA-SNAPSHOT</muleMavenClientApi>
+        <muleMavenClientApi>1.0.0-BETA-TEST-RELEASE</muleMavenClientApi>
         <muleMavenClientImpl>1.0.0-BETA-SNAPSHOT</muleMavenClientImpl>
         <mulePolicyApiVersion>1.0.0-BETA-TEST-RELEASE</mulePolicyApiVersion>
         <muleApiVersion>1.0.0-BETA-TEST-RELEASE</muleApiVersion>
