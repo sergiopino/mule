@@ -7,6 +7,7 @@
 package org.mule.test.runner.utils;
 
 import org.mule.runtime.extension.api.loader.ExtensionModelLoader;
+import org.mule.runtime.extension.internal.loader.XmlExtensionModelLoader;
 import org.mule.runtime.module.extension.internal.loader.java.CraftedExtensionModelLoader;
 import org.mule.runtime.module.extension.internal.loader.java.DefaultJavaExtensionModelLoader;
 import org.mule.runtime.module.extension.soap.internal.loader.SoapExtensionModelLoader;
@@ -21,6 +22,8 @@ public class ExtensionLoaderUtils {
         return new CraftedExtensionModelLoader();
       case DefaultJavaExtensionModelLoader.JAVA_LOADER_ID:
         return new DefaultJavaExtensionModelLoader();
+      case XmlExtensionModelLoader.DESCRIBER_ID:
+        return new XmlExtensionModelLoader();
       default:
         throw new RuntimeException("No loader found for id:{" + id + "}");
     }
